@@ -1,0 +1,21 @@
+<!-- Text web part HTML for the weekly status News post. Replace each ${...} with a Compose output. -->
+<h2>Overall status: ${OverallStatus}</h2>
+<p><strong>${Headline}</strong></p>
+<p>${StatusReason}</p>
+
+<h3>Highlights</h3>
+${HighlightsList}
+
+<h3>Risks and mitigations</h3>
+${RisksList}
+
+<h3>Decisions</h3>
+${DecisionsList}
+
+<h3>Asks</h3>
+${AsksList}
+
+<h3>Next steps</h3>
+${NextStepsList}
+
+<p><em>Prepared with PM Assistant and reviewed by ${ApproverName}. Full details: <a href="${ActionItemsListUrl}">Action Items</a> · <a href="${RisksListUrl}">Risks</a> · <a href="${DecisionsListUrl}">Decisions</a></em></p>
