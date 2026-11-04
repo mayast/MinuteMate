@@ -1,6 +1,8 @@
-# PM Assistant for Microsoft 365
+# MinuteMate
 
-Turns meeting notes into action items, risks, decisions and a reviewed weekly status update, all inside
+**Meetings that spark joy, not more work.**
+
+MinuteMate turns meeting notes into action items, risks, decisions and a reviewed weekly status update, all inside
 SharePoint, Teams and Outlook. Built for project managers who aren't technical: they paste notes into a list,
 and the rest happens automatically. A person approves every status update before it is published.
 
@@ -21,7 +23,7 @@ and the rest happens automatically. A person approves every status update before
 
 | Path | What it is |
 |---|---|
-| `provisioning/Setup-PmAssistant.ps1` | Creates the six SharePoint lists and their columns |
+| `provisioning/Setup-MinuteMate.ps1` | Creates the six SharePoint lists and their columns |
 | `prompts/01-extract-meeting-items.md` | AI Builder prompt: notes → summary, actions, risks, decisions (JSON) |
 | `prompts/02-weekly-status-draft.md` | AI Builder prompt: week's data → status update (JSON) |
 | `flows/01-process-meeting-notes.md` | Step-by-step build guide for Flow 1 |
@@ -45,7 +47,7 @@ and the rest happens automatically. A person approves every status update before
    Install-Module PnP.PowerShell -Scope CurrentUser
    # One-time per tenant (may need an admin to consent):
    Register-PnPEntraIDAppForInteractiveLogin -ApplicationName "PnP PowerShell" -Tenant <tenant>.onmicrosoft.com -Interactive
-   ./provisioning/Setup-PmAssistant.ps1 -SiteUrl "https://<tenant>.sharepoint.com/sites/<site>" -ClientId "<client id>"
+   ./provisioning/Setup-MinuteMate.ps1 -SiteUrl "https://<tenant>.sharepoint.com/sites/<site>" -ClientId "<client id>"
    ```
    Can't run scripts? Create the lists by hand from the table in `docs/architecture.md`.
 2. **Add a project** to the Projects list: owner, approver, Default Notify Via, Weekly Status On = Yes.
@@ -64,7 +66,7 @@ import it and only set their site URL and connections.
 ## Saving to GitHub
 
 ```bash
-git remote add origin https://github.com/<you>/pm-assistant-m365.git
+git remote add origin https://github.com/<you>/minutemate.git
 git push -u origin main
 ```
 Don't commit tenant URLs, client IDs or exported connection details; keep them in your own notes.

@@ -13,7 +13,7 @@ and items people add by hand.
 
 To re-send (for example after changing the owner or channel), set **Notified** back to **No**.
 
-- **Type:** Automated cloud flow · **Name:** `PMA 3 - Notify action owner`
+- **Type:** Automated cloud flow · **Name:** `MinuteMate 3 - Notify action owner`
 - **Connectors:** SharePoint, Microsoft Teams, Office 365 Outlook
 
 ## Steps

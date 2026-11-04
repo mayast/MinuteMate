@@ -2,7 +2,7 @@
 
 Create this in **Power Automate → AI hub → Prompts → Build your own prompt** (or Copilot Studio → Prompts).
 
-- **Name:** `PMA - Extract meeting items`
+- **Name:** `MinuteMate - Extract meeting items`
 - **Output:** set the prompt output to **JSON** and paste the example output below as the format sample.
 - **Inputs (text):** `MeetingTitle`, `MeetingDate`, `Attendees`, `ProjectName`, `Notes`
 

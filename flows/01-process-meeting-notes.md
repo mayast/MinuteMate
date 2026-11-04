@@ -5,7 +5,7 @@ the flow reads it with AI, writes a summary back, creates the meeting notes page
 risk and decision to its list. Owners are notified by **Flow 3**.
 
 - **Type:** Automated cloud flow
-- **Name:** `PMA 1 - Process meeting notes`
+- **Name:** `MinuteMate 1 - Process meeting notes`
 - **Connectors:** SharePoint, AI Builder, Office 365 Users, Office 365 Outlook (errors only)
 
 > Naming: rename each action as shown in **bold** so the expressions below work as written.
@@ -36,7 +36,7 @@ Then **Attendees Text** — *Compose*: `join(body('Attendee_Names'), ', ')`
 ### 5. Add a **Scope** named **Try** — put steps 6–12 inside it
 
 ### 6. **Run Extract Prompt** — AI Builder *Run a prompt*
-- Prompt: `PMA - Extract meeting items` (see `prompts/01-extract-meeting-items.md`)
+- Prompt: `MinuteMate - Extract meeting items` (see `prompts/01-extract-meeting-items.md`)
 - MeetingTitle: `triggerOutputs()?['body/Title']`
 - MeetingDate: `formatDateTime(triggerOutputs()?['body/MeetingDate'], 'yyyy-MM-dd')`
 - Attendees: `outputs('Attendees_Text')`

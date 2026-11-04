@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  Creates the SharePoint lists used by PM Assistant (Phase 1 + 2).
+  Creates the SharePoint lists used by MinuteMate (Phase 1 + 2).
 
 .DESCRIPTION
   Run once per SharePoint site. Safe to re-run: existing lists and columns are skipped.
@@ -15,7 +15,7 @@
   - Site Owner permission on the target site.
 
 .EXAMPLE
-  ./Setup-PmAssistant.ps1 -SiteUrl "https://contoso.sharepoint.com/sites/ProjectHub" -ClientId "00000000-0000-0000-0000-000000000000"
+  ./Setup-MinuteMate.ps1 -SiteUrl "https://contoso.sharepoint.com/sites/ProjectHub" -ClientId "00000000-0000-0000-0000-000000000000"
 #>
 param(
     [Parameter(Mandatory = $true)] [string] $SiteUrl,

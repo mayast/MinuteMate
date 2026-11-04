@@ -3,7 +3,7 @@
   "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
   "version": "1.4",
   "body": [
-    { "type": "TextBlock", "text": "New action item for you", "weight": "Bolder", "size": "Medium" },
+    { "type": "TextBlock", "text": "MinuteMate: a new action item for you", "weight": "Bolder", "size": "Medium" },
     { "type": "TextBlock", "text": "${Title}", "wrap": true, "size": "Large", "weight": "Bolder" },
     {
       "type": "FactSet",

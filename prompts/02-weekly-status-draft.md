@@ -1,6 +1,6 @@
 # Prompt 2 — Draft the weekly status update
 
-- **Name:** `PMA - Weekly status draft`
+- **Name:** `MinuteMate - Weekly status draft`
 - **Output:** **JSON** (format sample below)
 - **Inputs (text):** `ProjectName`, `WeekOf`, `MeetingSummaries`, `OpenActions`, `OverdueActions`,
   `CompletedActions`, `OpenRisks`, `NewDecisions`

@@ -4,7 +4,7 @@
 decisions, asks AI to draft the status update, and saves it as a **draft page**. The project's approver gets an
 approval request with a link to the draft. They can edit the page first. **Nothing is published until they approve.**
 
-- **Type:** Scheduled cloud flow · **Name:** `PMA 2 - Weekly status`
+- **Type:** Scheduled cloud flow · **Name:** `MinuteMate 2 - Weekly status`
 - **Schedule:** weekly, Friday 1:00 PM, your local time zone
 - **Connectors:** SharePoint, AI Builder, Approvals, Office 365 Outlook
 
@@ -43,7 +43,7 @@ Turn each result into short text lines with *Select* (text mode) + *Compose* `jo
 
 > Tip: if a project had no meetings and no changes this week, add a Condition to skip it.
 
-### 6. **Run Status Prompt** — AI Builder *Run a prompt* → `PMA - Weekly status draft`
+### 6. **Run Status Prompt** — AI Builder *Run a prompt* → `MinuteMate - Weekly status draft`
 Map each input to the matching Compose output from step 5. ProjectName: `items('Each_Project')?['Title']`,
 WeekOf: `outputs('Week_Start')`.
 

@@ -25,7 +25,7 @@ flowchart LR
     AP -->|Reject| BACK["Comments to project owner"]
 ```
 
-## Lists (created by `provisioning/Setup-PmAssistant.ps1`)
+## Lists (created by `provisioning/Setup-MinuteMate.ps1`)
 
 | List | Purpose | Key columns |
 |---|---|---|
