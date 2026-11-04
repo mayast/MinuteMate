@@ -5,7 +5,9 @@ logic, AI Builder for the AI step, and Teams/Outlook/Approvals for people. No se
 
 ```mermaid
 flowchart LR
-    PM["Project manager<br/>adds a meeting + notes"] --> M[("Meetings list")]
+    W["MinuteMate website<br/>(Capture on)"] --> M[("Meetings list")]
+    PM["Or paste notes"] --> M
+    TR["Teams transcript<br/>(Flow 4)"] --> M
     M -->|Flow 1| AI1["AI Builder prompt:<br/>extract items"]
     AI1 --> NP["Meeting notes page<br/>(SharePoint)"]
     AI1 --> A[("Action Items")]
@@ -51,5 +53,5 @@ flowchart LR
 |---|---|---|
 | 1 | Notes → summary, actions, risks, decisions; owner notifications | This kit |
 | 2 | Weekly status draft → approval → News post | This kit |
-| 3 | Pick Teams meetings to capture; pull the transcript or recap automatically | Next |
+| 3 | Website to pick Teams meetings to capture; Flow 4 pulls the transcript automatically | This kit (needs admin setup) |
 | 4 | Kickoff kit, timeline and dependency view, portfolio dashboard (Power Apps / Power BI) | Later |

@@ -61,7 +61,7 @@ Then **Attendees Text** — *Compose*: `join(body('Attendee_Names'), ', ')`
      items('Each_Action_Item')?['owner_email'],
      if(equals(length(coalesce(body('Search_Owner')?['value'], createArray())), 1),
         first(body('Search_Owner')?['value'])?['Mail'],
-        body('Get_Project')?['ProjectOwner/Email']))
+        coalesce(body('Get_Project')?['ProjectOwnerEmail'], body('Get_Project')?['ProjectOwner/Email'])))
   ```
   Falls back to the project owner when the owner is missing or the name matched several people.
 

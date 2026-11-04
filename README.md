@@ -10,7 +10,8 @@ and the rest happens automatically. A person approves every status update before
 
 ## What it does
 
-1. **Capture** — add a meeting to the **Meetings** list and paste the notes or the Teams meeting recap.
+1. **Capture** — on the MinuteMate website, switch **Capture** on for a Teams meeting (Flow 4 fetches the
+   transcript after it ends), or paste notes into the **Meetings** list.
 2. **Extract** — AI writes a summary and meeting notes page, and adds each action item, risk and decision
    to its own Microsoft List.
 3. **Notify** — each action item owner gets a Teams card, an Outlook email, or both. Set the default per
@@ -23,6 +24,9 @@ and the rest happens automatically. A person approves every status update before
 
 | Path | What it is |
 |---|---|
+| `web/` | The MinuteMate website (GitHub Pages): sign in, set up projects, pick meetings to capture. Try `?demo=1` |
+| `docs/setup-website.md` | Publishing the website and registering it in Entra ID |
+| `flows/04-capture-teams-transcript.md` | Step-by-step build guide for Flow 4 (Teams transcript → Raw Notes; Premium) |
 | `provisioning/Setup-MinuteMate.ps1` | Creates the six SharePoint lists and their columns |
 | `prompts/01-extract-meeting-items.md` | AI Builder prompt: notes → summary, actions, risks, decisions (JSON) |
 | `prompts/02-weekly-status-draft.md` | AI Builder prompt: week's data → status update (JSON) |
@@ -53,8 +57,10 @@ and the rest happens automatically. A person approves every status update before
 2. **Add a project** to the Projects list: owner, approver, Default Notify Via, Weekly Status On = Yes.
 3. **Create the two prompts** in AI hub from the `prompts/` files and test each with the sample notes.
 4. **Build the flows** in this order: Flow 1 → Flow 3 → Flow 2, following the guides in `flows/`.
-5. **Test end to end** with `samples/sample-meeting-notes.txt`, then run Flow 2 manually and approve.
-6. **Share with your team:** give project managers Contribute access to the site, pin the Meetings list
+5. **Website (optional, recommended):** follow `docs/setup-website.md`, then build Flow 4 so meetings are
+   captured from Teams transcripts with no copy and paste.
+6. **Test end to end** with `samples/sample-meeting-notes.txt`, then run Flow 2 manually and approve.
+7. **Share with your team:** give project managers Contribute access to the site, pin the Meetings list
    to the site navigation, and add the News web part to the home page.
 
 ## Packaging for other teams

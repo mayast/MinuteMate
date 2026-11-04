@@ -69,7 +69,7 @@ Approval Status `Pending`.
 ### 11. **Ask Approver** — Approvals *Start and wait for an approval*
 - Type: **Approve/Reject – First to respond**
 - Title: `concat('Approve status: ', items('Each_Project')?['Title'])`
-- Assigned to: `items('Each_Project')?['Approver/Email']`
+- Assigned to: `coalesce(items('Each_Project')?['ApproverEmail'], items('Each_Project')?['Approver/Email'])`
 - Details (Markdown):
   ```
   **Overall status:** @{body('Parse_Status')?['overall_status']} — @{body('Parse_Status')?['status_reason']}
@@ -90,7 +90,7 @@ Approval Status `Pending`.
 
 **No (rejected):**
 1. SharePoint *Update item* (Status Updates): Approval Status `Rejected`, Reviewer Comments as above.
-2. Outlook *Send an email (V2)* to the project owner with the comments and the draft link, so they can fix the
+2. Outlook *Send an email (V2)* to the project owner (`coalesce(items('Each_Project')?['ProjectOwnerEmail'], items('Each_Project')?['ProjectOwner/Email'])`) with the comments and the draft link, so they can fix the
    page and publish it manually or re-run the flow.
 
 ## Test

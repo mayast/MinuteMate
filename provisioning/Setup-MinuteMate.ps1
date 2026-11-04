@@ -67,6 +67,9 @@ function Choice($List, $Name, $Display, [string[]]$Choices, [string]$Default) {
 function DateF($List, $Name, $Display) {
     Add-XmlField $List $Name "<Field Type='DateTime' ID='{$(New-Guid-Str)}' Name='$Name' StaticName='$Name' DisplayName='$Display' Format='DateOnly' />"
 }
+function DateTimeF($List, $Name, $Display) {
+    Add-XmlField $List $Name "<Field Type='DateTime' ID='{$(New-Guid-Str)}' Name='$Name' StaticName='$Name' DisplayName='$Display' Format='DateTime' />"
+}
 function UserF($List, $Name, $Display, [switch]$Multi) {
     $t = if ($Multi) { "Type='UserMulti' Mult='TRUE'" } else { "Type='User'" }
     Add-XmlField $List $Name "<Field $t ID='{$(New-Guid-Str)}' Name='$Name' StaticName='$Name' DisplayName='$Display' UserSelectionMode='PeopleOnly' />"
@@ -87,6 +90,8 @@ $notify = @('Teams', 'Outlook', 'Teams and Outlook')
 $projects = Ensure-List "Projects" "Projects"
 UserF  $projects "ProjectOwner" "Project Owner"
 UserF  $projects "Approver" "Status Approver"
+Text   $projects "ProjectOwnerEmail" "Project Owner Email"
+Text   $projects "ApproverEmail" "Status Approver Email"
 Choice $projects "DefaultNotifyVia" "Default Notify Via" $notify "Teams"
 Choice $projects "OverallStatus" "Overall Status" @('On track', 'At risk', 'Off track') "On track"
 BoolF  $projects "WeeklyStatusOn" "Weekly Status On"
@@ -98,7 +103,12 @@ DateF   $meetings "MeetingDate" "Meeting Date"
 UserF   $meetings "Attendees" "Attendees" -Multi
 Note    $meetings "RawNotes" "Raw Notes or Transcript"
 Note    $meetings "Summary" "AI Summary" -Rich
-Choice  $meetings "ProcessingStatus" "Processing Status" @('New', 'Processing', 'Done', 'Needs review', 'Error') "New"
+Choice  $meetings "ProcessingStatus" "Processing Status" @('New', 'Waiting for transcript', 'Processing', 'Done', 'Needs review', 'Error') "New"
+Choice  $meetings "CaptureMode" "Capture Mode" @('Pasted notes', 'Teams transcript') "Pasted notes"
+DateTimeF $meetings "MeetingStart" "Meeting Start"
+DateTimeF $meetings "MeetingEnd" "Meeting End"
+Note    $meetings "JoinUrl" "Teams Join Link"
+Text    $meetings "OrganizerEmail" "Organizer Email"
 UrlF    $meetings "NotesPage" "Meeting Notes Page"
 
 # ---------- Action Items ----------
