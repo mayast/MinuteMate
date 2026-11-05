@@ -9,5 +9,7 @@ window.MINUTEMATE_CONFIG = {
   siteHostname: "contoso.sharepoint.com",
   sitePath: "/sites/ProjectHub",
   // How far ahead to look for Teams meetings in the meeting picker
-  meetingLookaheadDays: 14
+  meetingLookaheadDays: 14,
+  // Optional: mailbox people can add to invites so meetings are captured automatically (Flow 5), e.g. "minutemate@contoso.com"
+  inviteAddress: ""
 };

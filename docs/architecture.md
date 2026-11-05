@@ -5,9 +5,12 @@ logic, AI Builder for the AI step, and Teams/Outlook/Approvals for people. No se
 
 ```mermaid
 flowchart LR
-    W["MinuteMate website<br/>(Capture on)"] --> M[("Meetings list")]
+    K["Kickoff kit<br/>(website)"] --> P[("Projects, Stakeholders,<br/>Milestones")]
+    K -->|Flow 6| CH["AI charter page<br/>(draft for review)"]
+    W["Website: Capture on<br/>or invite MinuteMate (Flow 5)"] --> M[("Meetings list")]
     PM["Or paste notes"] --> M
-    TR["Teams transcript<br/>(Flow 4)"] --> M
+    TR["Every 30 min: Teams<br/>transcript (Flow 4)"] --> M
+    P -->|Flow 7| SL["Slip alerts to<br/>dependent owners"]
     M -->|Flow 1| AI1["AI Builder prompt:<br/>extract items"]
     AI1 --> NP["Meeting notes page<br/>(SharePoint)"]
     AI1 --> A[("Action Items")]
@@ -37,6 +40,13 @@ flowchart LR
 | Risks | Running risk log | Impact, Likelihood, Mitigation, Owner, Status |
 | Decisions | Running decision log | Decision Date, Decided By, Rationale |
 | Status Updates | One row per weekly draft | Week Of, Overall Status, Draft Page, Approval Status, Reviewer Comments, Published News Post |
+| Milestones | Timeline and dependencies | Workstream, Start Date, Due Date, Status, Owner Email, Gate, Depends On (multi-lookup) |
+| Stakeholders | Kickoff kit: people and RACI | Email, Role, RACI, Influence |
+| Kickoffs | Kickoff kit → charter | Goal, Scope, Out of Scope, Success Metrics, Constraints, Status, Charter Page |
+
+The website also uses: Projects → Project Code, Auto-capture Keywords, Start/Target Date, Owner/Approver Email;
+Meetings → Capture Mode, Meeting Start/End, Teams Join Link, Organizer Email, Series Id, Transcript Attempts;
+Action Items → Owner Email.
 
 ## Design choices
 
@@ -53,5 +63,6 @@ flowchart LR
 |---|---|---|
 | 1 | Notes → summary, actions, risks, decisions; owner notifications | This kit |
 | 2 | Weekly status draft → approval → News post | This kit |
-| 3 | Website to pick Teams meetings to capture; Flow 4 pulls the transcript automatically | This kit (needs admin setup) |
-| 4 | Kickoff kit, timeline and dependency view, portfolio dashboard (Power Apps / Power BI) | Later |
+| 3 | Pick meetings to capture (single, series, keyword rules, or invite MinuteMate); transcript queue with retry; Flow 4 sweeps for transcripts | This kit (Flow 4 needs admin setup) |
+| 4 | Kickoff kit with AI charter, timeline and dependency view with slip alerts, full tracker | This kit |
+| 5 | Portfolio view across projects, Power BI reporting, Teams app packaging | Ideas |

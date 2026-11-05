@@ -4,7 +4,8 @@
 
 .DESCRIPTION
   Run once per SharePoint site. Safe to re-run: existing lists and columns are skipped.
-  Creates: Projects, Meetings, Action Items, Risks, Decisions, Status Updates.
+  Creates: Projects, Meetings, Action Items, Risks, Decisions, Status Updates,
+  Milestones, Stakeholders, Kickoffs (Phases 1-4).
 
 .REQUIREMENTS
   - PowerShell 7.4+
@@ -70,6 +71,12 @@ function DateF($List, $Name, $Display) {
 function DateTimeF($List, $Name, $Display) {
     Add-XmlField $List $Name "<Field Type='DateTime' ID='{$(New-Guid-Str)}' Name='$Name' StaticName='$Name' DisplayName='$Display' Format='DateTime' />"
 }
+function NumberF($List, $Name, $Display) {
+    Add-XmlField $List $Name "<Field Type='Number' ID='{$(New-Guid-Str)}' Name='$Name' StaticName='$Name' DisplayName='$Display' Decimals='0'><Default>0</Default></Field>"
+}
+function LookupMultiF($List, $Name, $Display, $TargetList) {
+    Add-XmlField $List $Name "<Field Type='LookupMulti' Mult='TRUE' ID='{$(New-Guid-Str)}' Name='$Name' StaticName='$Name' DisplayName='$Display' List='{$($TargetList.Id)}' ShowField='Title' />"
+}
 function UserF($List, $Name, $Display, [switch]$Multi) {
     $t = if ($Multi) { "Type='UserMulti' Mult='TRUE'" } else { "Type='User'" }
     Add-XmlField $List $Name "<Field $t ID='{$(New-Guid-Str)}' Name='$Name' StaticName='$Name' DisplayName='$Display' UserSelectionMode='PeopleOnly' />"
@@ -95,6 +102,10 @@ Text   $projects "ApproverEmail" "Status Approver Email"
 Choice $projects "DefaultNotifyVia" "Default Notify Via" $notify "Teams"
 Choice $projects "OverallStatus" "Overall Status" @('On track', 'At risk', 'Off track') "On track"
 BoolF  $projects "WeeklyStatusOn" "Weekly Status On"
+Text   $projects "ProjectCode" "Project Code"
+Text   $projects "AutoCaptureKeywords" "Auto-capture Keywords"
+DateF  $projects "StartDate" "Start Date"
+DateF  $projects "TargetDate" "Target Date"
 
 # ---------- Meetings (intake: paste notes or the Teams recap here) ----------
 $meetings = Ensure-List "Meetings" "Meetings"
@@ -109,6 +120,9 @@ DateTimeF $meetings "MeetingStart" "Meeting Start"
 DateTimeF $meetings "MeetingEnd" "Meeting End"
 Note    $meetings "JoinUrl" "Teams Join Link"
 Text    $meetings "OrganizerEmail" "Organizer Email"
+Text    $meetings "SeriesId" "Series Id"
+NumberF $meetings "TranscriptAttempts" "Transcript Attempts"
+DateTimeF $meetings "LastChecked" "Transcript Last Checked"
 UrlF    $meetings "NotesPage" "Meeting Notes Page"
 
 # ---------- Action Items ----------
@@ -117,6 +131,7 @@ LookupF $actions "Project" "Project" $projects
 LookupF $actions "SourceMeeting" "Source Meeting" $meetings
 UserF   $actions "Owner" "Owner"
 Text    $actions "OwnerAsWritten" "Owner (as written in notes)"
+Text    $actions "OwnerEmail" "Owner Email"
 DateF   $actions "DueDate" "Due Date"
 Choice  $actions "ItemStatus" "Status" @('Not started', 'In progress', 'Blocked', 'Done') "Not started"
 Choice  $actions "Priority" "Priority" @('High', 'Medium', 'Low') "Medium"
@@ -151,6 +166,37 @@ UrlF    $status "DraftPage" "Draft Page"
 Choice  $status "ApprovalStatus" "Approval Status" @('Pending', 'Approved', 'Rejected', 'Published') "Pending"
 Note    $status "ReviewerComments" "Reviewer Comments"
 UrlF    $status "PublishedPage" "Published News Post"
+
+# ---------- Milestones (Phase 4: timeline and dependencies) ----------
+$milestones = Ensure-List "Milestones" "Milestones"
+LookupF $milestones "Project" "Project" $projects
+Text    $milestones "Workstream" "Workstream"
+DateF   $milestones "StartDate" "Start Date"
+DateF   $milestones "DueDate" "Due Date"
+Choice  $milestones "MilestoneStatus" "Status" @('Not started', 'In progress', 'Blocked', 'Done') "Not started"
+Text    $milestones "OwnerEmail" "Owner Email"
+BoolF   $milestones "IsGate" "Gate"
+LookupMultiF $milestones "DependsOn" "Depends On" $milestones
+BoolF   $milestones "SlipNotified" "Slip Notified"
+
+# ---------- Stakeholders (Phase 4: kickoff kit) ----------
+$stakeholders = Ensure-List "Stakeholders" "Stakeholders"
+LookupF $stakeholders "Project" "Project" $projects
+Text    $stakeholders "Email" "Email"
+Text    $stakeholders "Role" "Role"
+Choice  $stakeholders "RACI" "RACI" @('Responsible', 'Accountable', 'Consulted', 'Informed') "Informed"
+Choice  $stakeholders "Influence" "Influence" @('High', 'Medium', 'Low') "Medium"
+
+# ---------- Kickoffs (Phase 4: kickoff kit → AI charter page) ----------
+$kickoffs = Ensure-List "Kickoffs" "Kickoffs"
+LookupF $kickoffs "Project" "Project" $projects
+Note    $kickoffs "Goal" "Goal"
+Note    $kickoffs "Scope" "In Scope"
+Note    $kickoffs "OutOfScope" "Out of Scope"
+Note    $kickoffs "SuccessMetrics" "Success Metrics"
+Note    $kickoffs "Constraints" "Constraints and Assumptions"
+Choice  $kickoffs "KickoffStatus" "Status" @('Draft requested', 'Generating', 'Ready', 'Error') "Draft requested"
+UrlF    $kickoffs "CharterPage" "Charter Page"
 
 Write-Host "`nDone. Lists are ready on $SiteUrl" -ForegroundColor Green
 Write-Host "Next: add one item to 'Projects', then build the flows in /flows." -ForegroundColor Green

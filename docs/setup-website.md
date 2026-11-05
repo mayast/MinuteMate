@@ -38,9 +38,16 @@ window.MINUTEMATE_CONFIG = {
 Commit and push. These values aren't secrets: single-page apps have no client secret.
 
 ## 4. Make sure the lists have the website's columns
-Re-run `provisioning/Setup-MinuteMate.ps1`. It's safe to re-run and adds the new columns:
-Projects → Project Owner Email, Status Approver Email · Meetings → Capture Mode, Meeting Start, Meeting End,
-Teams Join Link, Organizer Email, and the *Waiting for transcript* status.
+Re-run `provisioning/Setup-MinuteMate.ps1`. It's safe to re-run: it adds the Milestones, Stakeholders and
+Kickoffs lists and every column the website uses (see `docs/architecture.md`), and skips what already exists.
+
+> If you created the *Processing Status* column with an earlier version of the script, add the choice
+> **Waiting for transcript** to it by hand (List settings → Processing Status): re-running doesn't change
+> existing columns.
+
+## 4b. Optional: invite-based capture
+Set `inviteAddress` in `config.js` to the MinuteMate mailbox (Flow 5) so the Meetings tab tells people they can
+add it to an invite instead.
 
 ## 5. Turn on the transcript back end
 The website only *registers* meetings. Reading transcripts needs app permissions a web page can't hold, so

@@ -1,93 +1,107 @@
-# Flow 4 — Capture the Teams transcript automatically
+# Flow 4 — Pick up Teams transcripts automatically (Phase 3)
 
-**What it does:** when a meeting is added from the MinuteMate website (Capture Mode = *Teams transcript*),
-the flow waits until the meeting ends, finds the meeting from its Teams link, downloads the transcript,
-puts it in **Raw Notes**, and sets the status to **New**. Flow 1 then takes over as usual.
+**What it does:** every 30 minutes, it looks for captured meetings that have ended and are still
+**Waiting for transcript**. For each one it finds the meeting from its Teams link, downloads the newest
+transcript, puts it in **Raw Notes**, and sets the status to **New**, which starts Flow 1. If no transcript
+appears after about 6 hours, the meeting is marked **Error** and the organizer is told how to fix it. People can
+click **Retry** on the website's transcript queue to start over.
 
-- **Type:** Automated cloud flow · **Name:** `MinuteMate 4 - Capture Teams transcript`
+Why a scheduled sweep instead of one waiting flow per meeting: runs survive flow edits, meetings scheduled weeks
+ahead don't hold a run open, and one flow handles every project.
+
+- **Type:** Scheduled cloud flow · **Name:** `MinuteMate 4 - Pick up Teams transcripts`
+- **Schedule:** every 30 minutes
 - **License:** Power Automate **Premium** (the *HTTP* action is premium)
-- **Connectors:** SharePoint, HTTP
+- **Connectors:** SharePoint, HTTP, Office 365 Outlook
 
 ## One-time admin setup (needs your Microsoft 365 admins)
 
 1. **Turn on Graph access to transcripts.** A Teams admin must allow apps to read meeting transcripts.
    Without it, calls fail with `403 GraphAccessToTranscriptsDisabled`.
 2. **App registration for the back end** (separate from the website's registration):
-   - Entra ID → App registrations → New → name `MinuteMate Backend`
-   - API permissions → Microsoft Graph → **Application** permissions:
-     `OnlineMeetings.Read.All` (find the meeting from its link) and `OnlineMeetingTranscript.Read.All`
-     (read the transcript) → **Grant admin consent**
-   - Certificates & secrets → new client secret. Store it in an **environment variable of type Secret**
-     (backed by Azure Key Vault) or at least mark the HTTP action's inputs/outputs as **Secure**.
-3. **Application access policy for online meetings.** Teams admins usually have to allow the app to read
-   meetings for the organizers it serves (PowerShell, Teams module):
+   - Entra ID → App registrations → New → `MinuteMate Backend`
+   - API permissions → Microsoft Graph → **Application**: `OnlineMeetings.Read.All` (find a meeting from its
+     link), `OnlineMeetingTranscript.Read.All` (read transcripts), `User.Read.All` (look up the organizer) →
+     **Grant admin consent**
+   - Certificates & secrets → new client secret. Keep it in an **environment variable of type Secret** (backed by
+     Azure Key Vault), and turn on **Secure inputs/outputs** for every HTTP action.
+3. **Application access policy for online meetings** (Teams PowerShell):
    ```powershell
    New-CsApplicationAccessPolicy -Identity MinuteMate-Policy -AppIds "<backend client id>" -Description "MinuteMate"
-   Grant-CsApplicationAccessPolicy -PolicyName MinuteMate-Policy -Global
+   Grant-CsApplicationAccessPolicy -PolicyName MinuteMate-Policy -Global   # or grant to specific organizers
    ```
-   Scope it to specific users instead of `-Global` if your admins prefer.
-4. **Transcription must be on** in each meeting (the organizer starts it, or a Teams meeting policy turns it
-   on automatically). No transcript, nothing to capture.
+4. **Transcription must be on** in each meeting: the organizer starts it, or a Teams meeting policy turns it on.
 
-> Verify each permission name and the policy step against Microsoft Learn for your tenant before you start.
+> Check each permission name and the policy step against current Microsoft Learn pages before you start.
 > Microsoft changes these APIs from time to time.
+
+**HTTP authentication (use on every HTTP action below):** Active Directory OAuth · Authority
+`https://login.microsoftonline.com` · Tenant `<tenant id>` · Audience `https://graph.microsoft.com` ·
+Client ID / Secret from the backend app.
 
 ## Steps
 
-### 1. Trigger — SharePoint *When an item is created* (Meetings)
-Trigger conditions:
-```
-@equals(triggerOutputs()?['body/CaptureMode/Value'], 'Teams transcript')
-@equals(triggerOutputs()?['body/ProcessingStatus/Value'], 'Waiting for transcript')
-```
+### 1. Trigger — *Recurrence*: every 30 minutes
 
-### 2. **Wait Until End** — *Delay until*
-`addMinutes(triggerOutputs()?['body/MeetingEnd'], 15)`
-(Flows can wait up to 30 days, so meetings scheduled well ahead are fine.)
-
-### 3. **Get Organizer** — *HTTP*
-- Method `GET` · URI `https://graph.microsoft.com/v1.0/users/@{triggerOutputs()?['body/OrganizerEmail']}?$select=id`
-- Authentication: **Active Directory OAuth** · Authority `https://login.microsoftonline.com` ·
-  Tenant `<tenant id>` · Audience `https://graph.microsoft.com` · Client ID / Secret from the backend app
-
-Use the same Authentication settings on every HTTP action below.
-
-### 4. **Find Meeting** — *HTTP*
-- Method `GET`
-- URI:
+### 2. **Due Meetings** — SharePoint *Get items* (Meetings)
+- Filter Query:
   ```
-  https://graph.microsoft.com/v1.0/users/@{body('Get_Organizer')?['id']}/onlineMeetings?$filter=JoinWebUrl eq '@{encodeUriComponent(triggerOutputs()?['body/JoinUrl'])}'
+  ProcessingStatus eq 'Waiting for transcript' and MeetingEnd lt '@{addMinutes(utcNow(), -10)}'
   ```
-**Meeting Id** — *Compose*: `first(body('Find_Meeting')?['value'])?['id']`
+- Top Count: 50
 
-### 5. **Wait For Transcript** — *Do until* `not(empty(variables('TranscriptId')))` (limit: 12 runs)
-Initialize a string variable `TranscriptId` before the loop. Inside the loop:
-- **List Transcripts** — *HTTP* `GET`
-  `https://graph.microsoft.com/v1.0/users/@{body('Get_Organizer')?['id']}/onlineMeetings/@{outputs('Meeting_Id')}/transcripts`
-- *Set variable* `TranscriptId` = `coalesce(last(body('List_Transcripts')?['value'])?['id'], '')`
-- If still empty: *Delay* 15 minutes
+### 3. **Each Meeting** — *Apply to each* over `body('Due_Meetings')?['value']`
+Settings → Concurrency control: **on**, degree **5**. Inside the loop, add a **Scope** named **Try** with steps 3a–3e.
 
-Transcripts can take a while to appear after a meeting ends; 12 × 15 minutes covers about 3 hours.
+**3a. Get Organizer** — *HTTP* `GET`
+```
+https://graph.microsoft.com/v1.0/users/@{items('Each_Meeting')?['OrganizerEmail']}?$select=id
+```
 
-### 6. Condition **Got Transcript** — `empty(variables('TranscriptId'))` is equal to `false`
+**3b. Find Meeting** — *HTTP* `GET`
+```
+https://graph.microsoft.com/v1.0/users/@{body('Get_Organizer')?['id']}/onlineMeetings?$filter=JoinWebUrl eq '@{encodeUriComponent(items('Each_Meeting')?['JoinUrl'])}'
+```
 
-**Yes:**
+**3c. List Transcripts** — *HTTP* `GET`
+```
+https://graph.microsoft.com/v1.0/users/@{body('Get_Organizer')?['id']}/onlineMeetings/@{first(body('Find_Meeting')?['value'])?['id']}/transcripts
+```
+Then **Newest Transcript** — *Compose*:
+```
+last(sort(coalesce(body('List_Transcripts')?['value'], createArray()), 'createdDateTime'))
+```
+Recurring meetings share one link, so the newest transcript is the one from the meeting that just ended.
+Only accept it if it was created after the meeting started — **Is New** (*Compose*):
+```
+and(not(empty(outputs('Newest_Transcript'))), greater(ticks(outputs('Newest_Transcript')?['createdDateTime']), ticks(items('Each_Meeting')?['MeetingStart'])))
+```
+
+**3d. Condition — Got Transcript** — `outputs('Is_New')` is equal to `true`
+
+*Yes:*
 1. **Get Content** — *HTTP* `GET`
-   `https://graph.microsoft.com/v1.0/users/@{body('Get_Organizer')?['id']}/onlineMeetings/@{outputs('Meeting_Id')}/transcripts/@{variables('TranscriptId')}/content?$format=text/vtt`
-2. **Clean Text** — *Compose* (keeps speaker lines, drops cue numbers and timestamps):
    ```
-   join(xpath(xml(concat('<r><l>', replace(replace(replace(string(body('Get_Content')), '&', '&amp;'), '<', '&lt;'), decodeUriComponent('%0A'), '</l><l>'), '</l></r>')), '//l[not(contains(., ''-->'')) and string-length(normalize-space(.)) > 0 and not(starts-with(., ''WEBVTT''))]/text()'), decodeUriComponent('%0A'))
+   https://graph.microsoft.com/v1.0/users/@{body('Get_Organizer')?['id']}/onlineMeetings/@{first(body('Find_Meeting')?['value'])?['id']}/transcripts/@{outputs('Newest_Transcript')?['id']}/content?$format=text/vtt
    ```
-   If this expression is hard to maintain, skip it: the extraction prompt handles raw VTT, it just uses more
-   of the prompt's input size.
-3. SharePoint *Update item* (Meetings): Raw Notes = `outputs('Clean_Text')`, Processing Status = `New`
-   → **Flow 1 starts automatically.**
+2. SharePoint *Update item* (Meetings, Id = `items('Each_Meeting')?['ID']`):
+   Raw Notes = `string(body('Get_Content'))`, Processing Status = `New`, Transcript Last Checked = `utcNow()`
+   → **Flow 1 starts automatically.** (The extraction prompt reads raw VTT. If you hit the prompt's size limit on
+   long meetings, strip timestamp lines first or summarize in two passes.)
 
-**No:** SharePoint *Update item* (Meetings): Processing Status = `Error`, and email the organizer:
-"No transcript was found for <meeting>. Was transcription turned on? You can paste notes into Raw Notes and set
-the status to New."
+*No:*
+1. **Attempts** — *Compose*: `add(int(coalesce(items('Each_Meeting')?['TranscriptAttempts'], 0)), 1)`
+2. Condition `outputs('Attempts')` is greater than or equal to `12` (12 × 30 min ≈ 6 hours)
+   - *Yes:* *Update item*: Processing Status `Error`, Transcript Attempts = `outputs('Attempts')`; then Outlook
+     *Send an email (V2)* to `items('Each_Meeting')?['OrganizerEmail']`:
+     "MinuteMate couldn't find a transcript for <meeting>. Was transcription on? You can paste notes into Raw Notes
+     and set the status to New, or click Retry on the MinuteMate site."
+   - *No:* *Update item*: Transcript Attempts = `outputs('Attempts')`, Transcript Last Checked = `utcNow()`
+
+**3e. Catch** — a Scope after **Try**, run after *has failed*: *Update item* → Transcript Attempts + 1 and
+Transcript Last Checked = `utcNow()` (the next sweep tries again; after 12 tries it becomes Error).
 
 ## Limits to know
-- Only meetings scheduled in Teams with a join link work; **channel meetings aren't supported** for transcripts.
-- Recurring meetings share one join link: the flow takes the **latest** transcript, which is the one just held.
-- Long meetings may exceed the AI prompt's input size. Trim, or summarize in two passes.
+- Channel meetings aren't supported for transcripts.
+- The organizer must be in your tenant; external organizers' meetings can't be read.
+- Each sweep makes about four Graph calls per waiting meeting.

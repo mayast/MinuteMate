@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>MinuteMate</title>
-  <meta name="description" content="Set up MinuteMate projects and choose which Teams meetings to capture.">
+  <meta name="description" content="Capture Teams meetings, track follow-ups and dependencies, and kick off projects with MinuteMate.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23e8590c'/%3E%3Cpath d='M9 11h14M9 16h14M9 21h9' stroke='white' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
   <script src="config.js"></script>
-  <script src="app.js" defer></script>
+  <script type="module" src="js/app.js"></script>
 </head>
 <body>
   <header class="topbar">
@@ -27,7 +27,7 @@
   <main id="main">
     <section class="signin" id="signin" hidden>
       <h1>Turn Teams meetings into follow-through</h1>
-      <p>Pick the meetings you want captured. MinuteMate reads the transcript after the meeting, logs action items, risks and decisions, notifies owners, and drafts your weekly status for approval.</p>
+      <p>Pick the meetings to capture. MinuteMate reads each transcript, logs action items, risks and decisions, notifies owners, keeps your timeline and dependencies in view, and drafts the weekly status for approval.</p>
       <div class="signin-actions">
         <button class="btn primary" id="signinBtn">Sign in with Microsoft</button>
         <a class="btn ghost" href="?demo=1">Try the demo</a>
@@ -35,92 +35,30 @@
     </section>
 
     <div id="app" hidden>
-      <nav class="tabs" role="tablist">
-        <button role="tab" data-tab="meetings" aria-selected="true">Capture meetings</button>
-        <button role="tab" data-tab="projects" aria-selected="false">Projects</button>
-        <button role="tab" data-tab="activity" aria-selected="false">Activity</button>
-      </nav>
-
       <div class="project-bar">
         <label for="projectSelect">Project</label>
         <select id="projectSelect"></select>
+        <button class="btn small" id="kickoffBtn">+ Kick off a project</button>
       </div>
 
-      <!-- Capture meetings -->
-      <section class="panel" data-panel="meetings">
-        <div class="panel-head">
-          <div>
-            <h2>Upcoming Teams meetings</h2>
-            <p class="muted">Turn on <strong>Capture</strong> for the meetings MinuteMate should process. Transcription must be on during the meeting.</p>
-          </div>
-          <button class="btn ghost small" id="refreshMeetings">Refresh</button>
-        </div>
-        <ul class="meeting-list" id="meetingList"></ul>
+      <nav class="tabs" role="tablist" aria-label="MinuteMate sections">
+        <button role="tab" data-tab="overview" aria-selected="true">Overview</button>
+        <button role="tab" data-tab="meetings" aria-selected="false">Meetings</button>
+        <button role="tab" data-tab="tracker" aria-selected="false">Tracker</button>
+        <button role="tab" data-tab="timeline" aria-selected="false">Timeline</button>
+        <button role="tab" data-tab="settings" aria-selected="false">Settings</button>
+      </nav>
 
-        <details class="paste-link">
-          <summary>Meeting not listed? Add it with its Teams link</summary>
-          <form id="linkForm" class="form-grid">
-            <label>Meeting title<input name="title" required maxlength="200"></label>
-            <label>Teams meeting link<input name="joinUrl" type="url" required placeholder="https://teams.microsoft.com/l/meetup-join/..."></label>
-            <label>Starts<input name="start" type="datetime-local" required></label>
-            <label>Ends<input name="end" type="datetime-local" required></label>
-            <label>Organizer email<input name="organizer" type="email" required></label>
-            <div class="form-actions"><button class="btn primary" type="submit">Add meeting</button></div>
-          </form>
-        </details>
-      </section>
-
-      <!-- Projects -->
-      <section class="panel" data-panel="projects" hidden>
-        <div class="panel-head">
-          <div>
-            <h2 id="projectFormTitle">Project settings</h2>
-            <p class="muted">Who approves the weekly status, and how action item owners hear about their tasks.</p>
-          </div>
-          <button class="btn ghost small" id="newProjectBtn">+ New project</button>
-        </div>
-        <form id="projectForm" class="form-grid">
-          <input type="hidden" name="id">
-          <label>Project name<input name="title" required maxlength="200"></label>
-          <label>Project owner email<input name="ownerEmail" type="email" required list="peopleList" autocomplete="off"></label>
-          <label>Status approver email<input name="approverEmail" type="email" required list="peopleList" autocomplete="off"></label>
-          <fieldset>
-            <legend>Notify action item owners by</legend>
-            <label class="radio"><input type="radio" name="notify" value="Teams" checked> Teams</label>
-            <label class="radio"><input type="radio" name="notify" value="Outlook"> Outlook</label>
-            <label class="radio"><input type="radio" name="notify" value="Teams and Outlook"> Both</label>
-          </fieldset>
-          <label class="switch"><input type="checkbox" name="weekly" checked> <span>Draft a weekly status every Friday for approval</span></label>
-          <div class="form-actions"><button class="btn primary" type="submit">Save project</button></div>
-        </form>
-        <datalist id="peopleList"></datalist>
-      </section>
-
-      <!-- Activity -->
-      <section class="panel" data-panel="activity" hidden>
-        <div class="stats" id="stats"></div>
-        <div class="cols">
-          <div>
-            <h3>Recent meetings</h3>
-            <ul class="rows" id="recentMeetings"></ul>
-          </div>
-          <div>
-            <h3>Open action items</h3>
-            <ul class="rows" id="openActions"></ul>
-          </div>
-          <div>
-            <h3>Open risks</h3>
-            <ul class="rows" id="openRisks"></ul>
-          </div>
-          <div>
-            <h3>Status updates</h3>
-            <ul class="rows" id="statusUpdates"></ul>
-          </div>
-        </div>
-      </section>
+      <section class="panel" data-panel="overview" id="view-overview"></section>
+      <section class="panel" data-panel="meetings" id="view-meetings" hidden></section>
+      <section class="panel" data-panel="tracker" id="view-tracker" hidden></section>
+      <section class="panel" data-panel="timeline" id="view-timeline" hidden></section>
+      <section class="panel" data-panel="settings" id="view-settings" hidden></section>
+      <section class="panel" data-panel="kickoff" id="view-kickoff" hidden></section>
     </div>
   </main>
 
+  <datalist id="peopleList"></datalist>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </body>
 </html>

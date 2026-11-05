@@ -22,8 +22,15 @@ To re-send (for example after changing the owner or channel), set **Notified** b
 Trigger conditions:
 ```
 @equals(triggerOutputs()?['body/Notified'], false)
-@not(empty(triggerOutputs()?['body/Owner/Email']))
+@not(empty(coalesce(triggerOutputs()?['body/Owner/Email'], triggerOutputs()?['body/OwnerEmail'])))
 ```
+
+### 1b. **Owner Email** — *Compose*
+```
+coalesce(triggerOutputs()?['body/Owner/Email'], triggerOutputs()?['body/OwnerEmail'])
+```
+Items the AI creates use the Owner (person) column; items added on the website use Owner Email. Use
+`outputs('Owner_Email')` wherever the steps below say the owner's email.
 
 ### 2. **Get Project** — SharePoint *Get item* (Projects)
 - Id: `triggerOutputs()?['body/Project/Id']`
@@ -48,13 +55,13 @@ if(empty(triggerOutputs()?['body/DueDate']), 'No due date', formatDateTime(trigg
 ### 6. Condition **Use Teams** — `contains(outputs('Channel'), 'Teams')` is equal to `true`
 - **Yes:** Microsoft Teams *Post card in a chat or channel*
   - Post as: **Flow bot** · Post in: **Chat with Flow bot**
-  - Recipient: `triggerOutputs()?['body/Owner/Email']`
+  - Recipient: `outputs('Owner_Email')`
   - Adaptive Card: paste `templates/action-item-card.json`, then replace the `${...}` placeholders
     with dynamic content (title, project, due text, priority, details, item link).
 
 ### 7. Condition **Use Outlook** — `contains(outputs('Channel'), 'Outlook')` is equal to `true`
 - **Yes:** Office 365 Outlook *Send an email (V2)*
-  - To: `triggerOutputs()?['body/Owner/Email']`
+  - To: `outputs('Owner_Email')`
   - Subject: `concat('Action item: ', triggerOutputs()?['body/Title'])`
   - Body: `templates/action-item-email.html` (switch the body editor to code view `</>` and paste),
     then replace the `${...}` placeholders.
