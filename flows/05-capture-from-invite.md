@@ -27,6 +27,7 @@ No website visit needed: inviting MinuteMate is the whole step.
 coalesce(triggerOutputs()?['body/onlineMeeting/joinUrl'], '')
 ```
 Then a Condition: if it's empty, *Terminate* (Succeeded): not a Teams meeting.
+Also *Terminate* if the subject contains `[no-capture]` (privacy opt-out, see `docs/privacy.md`).
 
 ### 3. **Code** — *Compose* (text between the first `[` and `]` in the subject)
 ```

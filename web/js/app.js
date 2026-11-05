@@ -7,11 +7,12 @@ import * as meetings from "./views/meetings.js";
 import * as tracker from "./views/tracker.js";
 import * as timeline from "./views/timeline.js";
 import * as settings from "./views/settings.js";
+import * as impact from "./views/impact.js";
 import * as kickoff from "./views/kickoff.js";
 
 const CFG = window.MINUTEMATE_CONFIG || {};
 const DEMO = new URLSearchParams(location.search).has("demo");
-const VIEWS = { overview, meetings, tracker, timeline, settings, kickoff };
+const VIEWS = { overview, meetings, tracker, timeline, impact, settings, kickoff };
 
 const ctx = {
   cfg: CFG,
@@ -79,7 +80,17 @@ async function boot() {
         return;
       }
       await handleRedirect();
-      if (!(await accessToken())) { $("#signin").hidden = false; return; }
+      if (!(await accessToken())) {
+        $("#signin").hidden = false;
+        // Inside a Teams tab (an iframe), Microsoft's sign-in page can't load. Open the site in the browser instead.
+        if (window.self !== window.top) {
+          const btn = $("#signinBtn");
+          btn.textContent = "Open MinuteMate in your browser";
+          btn.replaceWith(Object.assign(document.createElement("a"), { className: btn.className, textContent: btn.textContent, href: location.href.split("?")[0], target: "_blank", rel: "noopener" }));
+          banner(`Sign-in opens in your browser. In Teams you can still <a href="?demo=1">try the demo</a>.`);
+        }
+        return;
+      }
     } else {
       banner(`Demo mode: sample data only, nothing is saved. <a href="${esc(location.pathname)}">Exit demo</a>`);
     }

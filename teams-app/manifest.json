@@ -1,0 +1,30 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.17/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.17",
+  "version": "1.0.0",
+  "id": "00000000-0000-0000-0000-000000000000",
+  "developer": {
+    "name": "MinuteMate",
+    "websiteUrl": "https://mayast.github.io/MinuteMate/",
+    "privacyUrl": "https://github.com/mayast/MinuteMate/blob/main/docs/privacy.md",
+    "termsOfUseUrl": "https://github.com/mayast/MinuteMate"
+  },
+  "name": { "short": "MinuteMate", "full": "MinuteMate: meetings that spark joy, not more work" },
+  "description": {
+    "short": "Turn Teams meetings into tracked actions, risks, decisions and approved status.",
+    "full": "MinuteMate captures the Teams meetings you choose, uses AI to log action items, risks and decisions, notifies owners, keeps a timeline with dependency checks, and drafts a weekly status that a person approves before it is published."
+  },
+  "icons": { "color": "color.png", "outline": "outline.png" },
+  "accentColor": "#E8590C",
+  "staticTabs": [
+    {
+      "entityId": "minutemate-home",
+      "name": "MinuteMate",
+      "contentUrl": "https://mayast.github.io/MinuteMate/",
+      "websiteUrl": "https://mayast.github.io/MinuteMate/",
+      "scopes": ["personal"]
+    }
+  ],
+  "permissions": ["identity"],
+  "validDomains": ["mayast.github.io"]
+}

@@ -1,0 +1,9 @@
+Localization vendor review – June 4, 2026
+Attendees: Ken Sato, Laura Chen, vendor account team
+
+We talked through switching the German vendor. Laura thinks we should, Ken wants to see Q2 quality scores first.
+No decision yet – we'll revisit next month.
+Someone should pull the Q2 quality scores before then.
+The vendor proposed moving to weekly delivery batches instead of daily. We liked the idea but need to check
+with engineering whether the publishing pipeline can handle it.
+Laura will send the vendor our updated glossary next week.

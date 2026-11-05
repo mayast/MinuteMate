@@ -8,7 +8,9 @@ const TYPES = {
     label: "Action items", statusField: "ItemStatus", statuses: ["Not started", "In progress", "Blocked", "Done"], doneValues: ["Done"],
     dueField: "DueDate",
     columns: [
-      { label: "Action", get: (x) => x.Title, kind: "title" },
+      { label: "Action", get: (x) => x.Title, kind: "title",
+        sub: (x) => [x.Source === "Meeting" ? "From a meeting" : "", Number(x.SeenInMeetings) > 1 ? `raised in ${x.SeenInMeetings} meetings` : ""].filter(Boolean).join(" · "),
+        link: (x) => x.ExternalLink?.Url },
       { label: "Owner", get: (x) => x.OwnerAsWritten || x.OwnerEmail || "—" },
       { label: "Due", field: "DueDate", kind: "date" },
       { label: "Priority", field: "Priority", kind: "select", options: LEVELS },
@@ -19,7 +21,7 @@ const TYPES = {
            <input name="due" type="date" aria-label="Due date">
            <select name="priority" aria-label="Priority"><option>Medium</option><option>High</option><option>Low</option></select>`,
     toFields: (f) => ({ Title: f.title.value.trim(), OwnerEmail: f.owner.value.trim(), OwnerAsWritten: f.owner.value.trim(),
-      DueDate: fromDateInput(f.due.value), Priority: f.priority.value, ItemStatus: "Not started", NotifyVia: "Project default", Notified: false })
+      DueDate: fromDateInput(f.due.value), Priority: f.priority.value, ItemStatus: "Not started", NotifyVia: "Project default", Notified: false, Source: "Manual" })
   },
   risks: {
     label: "Risks", statusField: "RiskStatus", statuses: ["Open", "Mitigating", "Closed"], doneValues: ["Closed"],
@@ -120,7 +122,11 @@ function rowHtml(x, T) {
   const late = T.dueField && isPast(x[T.dueField]) && !T.doneValues.includes(x[T.statusField]);
   return `<tr data-id="${esc(x.id)}" class="${late ? "late" : ""}">
     ${T.columns.map((c) => {
-      if (c.kind === "title") return `<td class="t-title">${esc(c.get(x))}${c.sub && c.sub(x) ? `<div class="sub">${esc(c.sub(x))}</div>` : ""}${late ? ` ${pill("Overdue")}` : ""}</td>`;
+      if (c.kind === "title") {
+        const link = c.link && c.link(x);
+        const extras = [link ? `<a class="ext" href="${esc(link)}" target="_blank" rel="noopener">Open in tracker ↗</a>` : "", x.SyncState === "Error" ? pill("Sync error") : ""].filter(Boolean).join(" ");
+        return `<td class="t-title">${esc(c.get(x))}${late ? ` ${pill("Overdue")}` : ""}${c.sub && c.sub(x) ? `<div class="sub">${esc(c.sub(x))}</div>` : ""}${extras ? `<div class="sub">${extras}</div>` : ""}</td>`;
+      }
       if (c.kind === "date") return `<td><input type="date" data-field="${c.field}" value="${toDateInput(x[c.field])}" aria-label="${esc(c.label)}"></td>`;
       if (c.kind === "select") return `<td><select data-field="${c.field}" aria-label="${esc(c.label)}">${c.options.map((o) => `<option ${x[c.field] === o ? "selected" : ""}>${esc(o)}</option>`).join("")}</select></td>`;
       return `<td>${esc(c.get(x))}</td>`;
@@ -151,8 +157,11 @@ function bind(ctx, el, T, rows) {
   el.querySelectorAll("tbody [data-field]").forEach((input) => input.addEventListener("change", () => {
     const id = input.closest("tr").dataset.id;
     const value = input.type === "date" ? fromDateInput(input.value) : input.value;
+    const fields = { [input.dataset.field]: value };
+    // Record when an action item is closed (the Impact tab measures on-time closing from this).
+    if (ui.type === "actions" && input.dataset.field === "ItemStatus") fields.ClosedDate = value === "Done" ? new Date().toISOString() : null;
     busy(input, async () => {
-      await ctx.data.update(ui.type, id, { [input.dataset.field]: value });
+      await ctx.data.update(ui.type, id, fields);
       await ctx.reload([ui.type]); rerender(); toast("Saved");
     });
   }));

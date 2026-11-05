@@ -32,7 +32,7 @@ const PILL = {
   Done: "ok", Published: "ok", Approved: "ok", "On track": "ok", Closed: "ok", Ready: "ok",
   "Needs review": "warn", "Waiting for transcript": "warn", Pending: "warn", "At risk": "warn", "In progress": "info",
   Mitigating: "info", Processing: "info", Generating: "info", "Draft requested": "info",
-  Error: "bad", Rejected: "bad", "Off track": "bad", Overdue: "bad", Blocked: "bad", High: "bad", Medium: "warn"
+  Error: "bad", "Sync error": "bad", Rejected: "bad", "Off track": "bad", Overdue: "bad", Blocked: "bad", High: "bad", Medium: "warn"
 };
 export const pill = (s, fallback = "New") => `<span class="pill ${PILL[s] || ""}">${esc(s || fallback)}</span>`;
 

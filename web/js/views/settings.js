@@ -1,6 +1,14 @@
 // Settings: project owner/approver, notifications, weekly status, auto-capture rules, stakeholders.
 import { esc, toast, busy, toDateInput, fromDateInput } from "../ui.js";
 
+const TRACKERS = ["None", "Planner", "Azure DevOps", "GitHub"];
+const HINTS = {
+  None: "not needed",
+  Planner: "plan ID, or leave blank to create a plan for this project",
+  "Azure DevOps": "organization/project, e.g. contoso/Phoenix",
+  GitHub: "owner/repo, e.g. contoso/phoenix"
+};
+
 export function render(ctx, el) {
   const p = ctx.project();
   if (!p) { el.innerHTML = `<p class="empty">No project yet. Use <strong>+ Kick off a project</strong> above.</p>`; return; }
@@ -25,6 +33,20 @@ export function render(ctx, el) {
         ${["Teams", "Outlook", "Teams and Outlook"].map((v) => `<label class="radio"><input type="radio" name="notify" value="${v}" ${(p.DefaultNotifyVia || "Teams") === v ? "checked" : ""}> ${v === "Teams and Outlook" ? "Both" : v}</label>`).join("")}
       </fieldset>
       <label class="switch"><input type="checkbox" name="weekly" ${p.WeeklyStatusOn ? "checked" : ""}> <span>Draft a weekly status every Friday for approval</span></label>
+
+      <h3 class="section-title full">Where the team tracks work</h3>
+      <label>Track action items in
+        <select name="tracker">${TRACKERS.map((t) => `<option ${(p.WorkTracker || "None") === t ? "selected" : ""}>${t}</option>`).join("")}</select></label>
+      <label>Tracker target <span class="hint" data-hint>${esc(HINTS[p.WorkTracker || "None"])}</span>
+        <input name="trackerTarget" maxlength="255" value="${esc(p.TrackerTarget || "")}" ${(p.WorkTracker || "None") === "None" ? "disabled" : ""}></label>
+      <p class="muted small full">MinuteMate keeps every action item in SharePoint and also creates it in the tracker you pick. Status changes made there come back here, so the weekly status, timeline and impact numbers stay complete.</p>
+
+      <h3 class="section-title full">Meeting chat and privacy</h3>
+      <label class="switch full"><input type="checkbox" name="recap" ${p.PostRecapToChat ? "checked" : ""}> <span>Post the recap and action items to the Teams meeting chat after each meeting</span></label>
+      <label class="switch full"><input type="checkbox" name="agenda" ${p.PostAgendaToChat ? "checked" : ""}> <span>Post an agenda (open items, overdue, new risks) before recurring meetings</span></label>
+      <label>Keep transcripts for (days) <span class="hint">summaries and items are kept; raw transcripts are deleted</span>
+        <input name="retention" type="number" min="1" max="3650" value="${esc(p.TranscriptRetentionDays || 30)}"></label>
+      <p class="muted small full">Meetings with <strong>[no-capture]</strong> in the title are never captured. See <em>docs/privacy.md</em> for the attendee notice.</p>
       <div class="form-actions"><button class="btn primary" type="submit">Save settings</button></div>
     </form>
 
@@ -47,6 +69,15 @@ export function render(ctx, el) {
       <button class="btn primary small" type="submit">Add</button>
     </form>`;
 
+  const pf = el.querySelector('[data-form="project"]');
+  pf.tracker.addEventListener("change", () => {
+    pf.trackerTarget.disabled = pf.tracker.value === "None";
+    el.querySelector("[data-hint]").textContent = HINTS[pf.tracker.value];
+  });
+  pf.addEventListener("submit", (ev) => {
+    const f = ev.target;
+    if (f.tracker.value !== "None" && f.tracker.value !== "Planner" && !f.trackerTarget.value.trim()) { ev.preventDefault(); ev.stopImmediatePropagation(); toast(`Add the ${f.tracker.value} target (${HINTS[f.tracker.value]}).`); return; }
+  }, true);
   el.querySelector('[data-form="project"]').addEventListener("submit", (ev) => {
     ev.preventDefault();
     const f = ev.target;
@@ -54,7 +85,9 @@ export function render(ctx, el) {
       await ctx.data.update("projects", p.id, {
         Title: f.title.value.trim(), ProjectCode: f.code.value.trim(), ProjectOwnerEmail: f.owner.value.trim(), ApproverEmail: f.approver.value.trim(),
         StartDate: fromDateInput(f.start.value), TargetDate: fromDateInput(f.target.value), AutoCaptureKeywords: f.keywords.value.trim(),
-        DefaultNotifyVia: f.querySelector('input[name="notify"]:checked').value, WeeklyStatusOn: f.weekly.checked
+        DefaultNotifyVia: f.querySelector('input[name="notify"]:checked').value, WeeklyStatusOn: f.weekly.checked,
+        WorkTracker: f.tracker.value, TrackerTarget: f.tracker.value === "None" ? "" : f.trackerTarget.value.trim(),
+        PostRecapToChat: f.recap.checked, PostAgendaToChat: f.agenda.checked, TranscriptRetentionDays: Number(f.retention.value) || 30
       });
       await ctx.reload(["projects"]); ctx.render(); toast("Settings saved");
     });

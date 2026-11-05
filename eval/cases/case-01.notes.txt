@@ -1,0 +1,12 @@
+Project Phoenix – weekly sync – May 26, 2026
+Attendees: Priya Patel, Ken Sato, Laura Chen, Maya Stewart
+
+- Beta scope: product and engineering signed off on the beta feature list. No more scope changes for beta.
+- Vendor API: Ken said the vendor's API won't be ready for June 5. Their new estimate is June 10.
+  Group agreed to move launch to June 12. Ken will check in with the vendor every Monday.
+  If it slips again we fall back to a manual CSV import for the first two weeks.
+- Priya will send the updated timeline to stakeholders by Friday.
+- Laura raised that localized UI strings for Japanese and German haven't been reviewed yet.
+  Laura to book a review session with the language leads next week.
+- Budget: still within plan. Maya to confirm the vendor penalty clause with procurement by May 30.
+- Open question: who signs off on the localized UI strings – product or the regional leads?

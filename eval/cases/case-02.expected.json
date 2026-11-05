@@ -1,0 +1,13 @@
+{
+  "_purpose": "Recurring meeting: repeated tasks must match existing items instead of creating duplicates.",
+  "action_items": [
+    { "title": "Send revised timeline to stakeholders", "owner_name": "Priya Patel", "due_date": "2026-06-03", "matches_existing_id": "21" },
+    { "title": "Confirm vendor penalty clause with procurement", "owner_name": "Maya Stewart", "due_date": "", "matches_existing_id": "23" },
+    { "title": "Weekly vendor check-in on API delivery", "owner_name": "Ken Sato", "due_date": "", "matches_existing_id": "24" },
+    { "title": "Draft one-page launch FAQ for the support team", "owner_name": "Ken Sato", "due_date": "2026-06-08", "matches_existing_id": "" }
+  ],
+  "risks": [
+    { "title": "Support staffing over launch weekend may be too thin" }
+  ],
+  "decisions": []
+}

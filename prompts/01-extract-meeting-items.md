@@ -4,7 +4,8 @@ Create this in **Power Automate → AI hub → Prompts → Build your own prompt
 
 - **Name:** `MinuteMate - Extract meeting items`
 - **Output:** set the prompt output to **JSON** and paste the example output below as the format sample.
-- **Inputs (text):** `MeetingTitle`, `MeetingDate`, `Attendees`, `ProjectName`, `Notes`
+- **Inputs (text):** `MeetingTitle`, `MeetingDate`, `Attendees`, `ProjectName`, `OpenActionItems`, `Notes`
+  (`OpenActionItems` is one line per open item: `id | title | owner | due`. It lets the AI avoid duplicates.)
 
 ## Prompt text
 
@@ -17,6 +18,9 @@ extract only what is clearly stated. Do not invent owners, dates or decisions.
 Project: {{ProjectName}}
 Meeting: {{MeetingTitle}} on {{MeetingDate}}
 Attendees: {{Attendees}}
+
+Action items already open for this project (id | title | owner | due):
+{{OpenActionItems}}
 
 Notes or transcript:
 """
@@ -35,6 +39,9 @@ Rules:
     to the meeting date); otherwise "".
   - priority: High, Medium or Low. Use Medium if unclear.
   - source_quote: the shortest phrase from the notes that supports the item.
+  - matches_existing_id: if this is the same task as one of the open items above (same work, even if
+    worded differently or with a new date), put that item's id here as text. Otherwise "". Do not match
+    items that only share a topic: "send timeline" and "review timeline" are different tasks.
 - risks: something that could delay, block or harm the project.
   - impact and likelihood: High, Medium or Low. Use Medium if unclear.
   - mitigation: what was proposed, or "" if nothing was proposed.
@@ -58,7 +65,8 @@ Use empty arrays when there is nothing for a section.
       "due_date": "2026-05-29",
       "priority": "High",
       "details": "Include the new launch date and the vendor dependency.",
-      "source_quote": "Priya will send the updated timeline by Friday"
+      "source_quote": "Priya will send the updated timeline by Friday",
+      "matches_existing_id": "21"
     }
   ],
   "risks": [

@@ -33,6 +33,11 @@ risk and decision to its list. Owners are notified by **Flow 3**.
 
 Then **Attendees Text** — *Compose*: `join(body('Attendee_Names'), ', ')`
 
+### 4b. **Open Items Text** — gather open action items so the AI can avoid duplicates
+- SharePoint *Get items* (Action Items), Filter: `ProjectId eq @{triggerOutputs()?['body/Project/Id']} and ItemStatus ne 'Done'`
+- *Select* (text mode): `concat(item()?['ID'], ' | ', item()?['Title'], ' | ', coalesce(item()?['OwnerAsWritten'], item()?['OwnerEmail'], ''), ' | ', coalesce(item()?['DueDate'], ''))`
+- *Compose*: `if(empty(body('Select')), '(none)', join(body('Select'), decodeUriComponent('%0A')))`
+
 ### 5. Add a **Scope** named **Try** — put steps 6–12 inside it
 
 ### 6. **Run Extract Prompt** — AI Builder *Run a prompt*
@@ -41,6 +46,7 @@ Then **Attendees Text** — *Compose*: `join(body('Attendee_Names'), ', ')`
 - MeetingDate: `formatDateTime(triggerOutputs()?['body/MeetingDate'], 'yyyy-MM-dd')`
 - Attendees: `outputs('Attendees_Text')`
 - ProjectName: `body('Get_Project')?['Title']`
+- OpenActionItems: `outputs('Open_Items_Text')`
 - Notes: `triggerOutputs()?['body/RawNotes']`
 
 ### 7. **Parse Items** — *Parse JSON*
@@ -65,6 +71,15 @@ Then **Attendees Text** — *Compose*: `join(body('Attendee_Names'), ', ')`
   ```
   Falls back to the project owner when the owner is missing or the name matched several people.
 
+  8b2. Condition **Is Duplicate** — `items('Each_Action_Item')?['matches_existing_id']` is not equal to `''`
+  - *Yes:* **Get Existing** — SharePoint *Get item* (Action Items, Id = `int(items('Each_Action_Item')?['matches_existing_id'])`),
+    then *Update item* on the same Id:
+    - Seen in Meetings: `add(int(coalesce(body('Get_Existing')?['SeenInMeetings'], 1)), 1)`
+    - Due Date: the new `due_date` if it isn't empty, otherwise keep `body('Get_Existing')?['DueDate']`
+    - Details: append `concat(decodeUriComponent('%0A'), 'Raised again on ', formatDateTime(triggerOutputs()?['body/MeetingDate'], 'MMM d'), ': "', items('Each_Action_Item')?['source_quote'], '"')`
+    - Skip step 8c for this item.
+  - *No:* continue to 8c.
+
   8c. **Create Action Item** — SharePoint *Create item* (Action Items)
   - Title: `items('Each_Action_Item')?['title']`
   - Project Id: `triggerOutputs()?['body/Project/Id']`
@@ -75,6 +90,7 @@ Then **Attendees Text** — *Compose*: `join(body('Attendee_Names'), ', ')`
   - Priority Value: `items('Each_Action_Item')?['priority']`
   - Details: `concat(items('Each_Action_Item')?['details'], decodeUriComponent('%0A%0A'), 'From notes: "', items('Each_Action_Item')?['source_quote'], '"')`
   - Notify Via Value: `Project default` · Notified: `No`
+  - Source Value: `Meeting` · Seen in Meetings: `1` · Sync State Value: `Not synced`
 
 ### 9. **Each Risk** — *Apply to each* over `body('Parse_Items')?['risks']`
 - SharePoint *Create item* (Risks): Title, Project Id, Source Meeting Id, Impact, Likelihood, Mitigation,
@@ -106,6 +122,10 @@ Follow `docs/sharepoint-pages-rest.md` → **Create a page** with:
 - Inside: SharePoint *Update item* (Meetings) → Processing Status `Error`
 - Outlook *Send an email (V2)* to `triggerOutputs()?['body/Author/Email']`:
   "We couldn't process the notes for <meeting>. Check the notes and set Processing Status back to New to retry."
+
+## After processing
+- **Flow 9** posts the recap to the Teams meeting chat when the meeting is marked Done (if the project turns it on).
+- **Flow 8** sends new action items to the project's work tracker (Planner, Azure DevOps or GitHub).
 
 ## Test
 

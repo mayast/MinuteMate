@@ -1,6 +1,10 @@
 // Meetings (Phase 3): choose Teams meetings to capture, auto-capture by keyword or whole series,
 // and watch the transcript pickup queue (waiting, processing, done, error → retry).
 import { esc, pill, fmtDay, fmtTime, toast, busy } from "../ui.js";
+import { buildAgenda } from "../agenda.js";
+
+// Privacy opt-out: meetings with [no-capture] in the title are never captured (Phase 5.7).
+const optedOut = (e) => /\[no-capture\]/i.test(e.title || "");
 
 const keywordsOf = (p) => (p?.AutoCaptureKeywords || "").split(/[,;]/).map((k) => k.trim().toLowerCase()).filter(Boolean);
 
@@ -11,7 +15,7 @@ export function render(ctx, el) {
   const all = ctx.state.lists.meetings || [];
   const byUrl = new Map(all.map((m) => [m.JoinUrl, m]));
   const kw = keywordsOf(p);
-  const suggestions = ctx.state.calendar.filter((e) => !byUrl.has(e.joinUrl) && kw.some((k) => e.title.toLowerCase().includes(k)));
+  const suggestions = ctx.state.calendar.filter((e) => !byUrl.has(e.joinUrl) && !optedOut(e) && kw.some((k) => e.title.toLowerCase().includes(k)));
   const queue = ctx.items("meetings").filter((m) => m.CaptureMode === "Teams transcript" || m.ProcessingStatus !== "Done")
     .sort((a, b) => (b.MeetingStart || "").localeCompare(a.MeetingStart || ""));
   const invite = ctx.cfg.inviteAddress;
@@ -60,16 +64,21 @@ function meetingRow(ctx, e, item) {
   const p = ctx.project();
   const other = item && item.ProjectLookupId !== p.id ? ctx.state.lists.projects.find((x) => x.id === item.ProjectLookupId) : null;
   const d = new Date(e.start);
-  const status = item ? (other ? `<span class="pill">Captured for ${esc(other.Title)}</span>` : pill(item.ProcessingStatus)) : "";
+  const status = item ? (other ? `<span class="pill">Captured for ${esc(other.Title)}</span>` : pill(item.ProcessingStatus)) : optedOut(e) ? `<span class="pill">Opted out</span>` : "";
+  const canAgenda = item && !other && new Date(e.start) > new Date();
   const seriesUncaptured = e.seriesId && ctx.state.calendar.some((x) => x.seriesId === e.seriesId && !ctx.state.lists.meetings.some((m) => m.JoinUrl === x.joinUrl));
   return `<li class="meeting">
     <div class="date-chip"><span class="m">${esc(d.toLocaleDateString(undefined, { month: "short" }))}</span><span class="d">${d.getDate()}</span></div>
     <div>
       <div class="title">${esc(e.title)} ${e.seriesId ? `<span class="pill">Recurring</span>` : ""}</div>
       <div class="meta">${esc(fmtDay(e.start))} · ${esc(fmtTime(e.start))}–${esc(fmtTime(e.end))} · ${esc(e.organizer || "unknown organizer")} ${status}</div>
-      ${e.seriesId && seriesUncaptured ? `<button class="linkish" data-act="series" data-series="${esc(e.seriesId)}">Capture every meeting in this series</button>` : ""}
+      <div class="row-links">
+        ${e.seriesId && seriesUncaptured && !optedOut(e) ? `<button class="linkish" data-act="series" data-series="${esc(e.seriesId)}">Capture every meeting in this series</button>` : ""}
+        ${canAgenda ? `<button class="linkish" data-act="agenda" data-join="${esc(e.joinUrl)}" aria-expanded="false">Preview agenda</button>` : ""}
+      </div>
+      ${canAgenda ? `<div class="agenda" data-agenda="${esc(e.joinUrl)}" hidden></div>` : ""}
     </div>
-    <label class="toggle"><input type="checkbox" data-join="${esc(e.joinUrl)}" ${item ? "checked" : ""} ${other ? "disabled" : ""}> Capture</label>
+    <label class="toggle"><input type="checkbox" data-join="${esc(e.joinUrl)}" ${item ? "checked" : ""} ${other || (optedOut(e) && !item) ? "disabled" : ""}> Capture</label>
   </li>`;
 }
 
@@ -120,6 +129,23 @@ function bind(ctx, el, suggestions) {
       }
       await refresh();
     }).then(() => ctx.render())));
+
+  el.querySelectorAll('[data-act="agenda"]').forEach((b) => b.addEventListener("click", () => {
+    const box = [...el.querySelectorAll("[data-agenda]")].find((d) => d.dataset.agenda === b.dataset.join);
+    const open = box.hidden;
+    box.hidden = !open;
+    b.setAttribute("aria-expanded", String(open));
+    b.textContent = open ? "Hide agenda" : "Preview agenda";
+    if (!open) return;
+    const e = ctx.state.calendar.find((x) => x.joinUrl === b.dataset.join);
+    const agenda = buildAgenda(ctx, e);
+    box.innerHTML = `${agenda.html}<div class="agenda-actions"><button class="btn ghost small" data-copy>Copy agenda</button>
+      <span class="muted small">${ctx.project().PostAgendaToChat ? "MinuteMate also posts this to the meeting chat before it starts." : "Turn on agenda posting in Settings to have it posted to the meeting chat."}</span></div>`;
+    box.querySelector("[data-copy]").addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(agenda.text); toast("Agenda copied"); }
+      catch { toast("Couldn't copy. Select the text and copy it instead."); }
+    });
+  }));
 
   el.querySelectorAll('[data-act="retry"]').forEach((b) => b.addEventListener("click", () =>
     busy(b, async () => {

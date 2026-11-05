@@ -270,3 +270,29 @@ form .form-actions { margin-top: 18px; gap: 10px; }
   .kit-card dl { grid-template-columns: 1fr; }
   .filters .spacer { display: none; }
 }
+
+/* ---------- Phase 5 additions ---------- */
+:root { --chart-1: #e8590c; }
+.row-links { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.agenda { margin-top: 10px; border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; background: var(--surface-2); }
+.agenda h4 { margin: 0 0 6px; font-size: .95rem; }
+.agenda .agenda-h { margin: 10px 0 2px; font-weight: 700; font-size: .85rem; }
+.agenda ul { margin: 0; padding-left: 18px; font-size: .88rem; }
+.agenda-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+.meeting .agenda { grid-column: 2 / -1; }
+a.ext { font-weight: 600; text-decoration: none; }
+a.ext:hover { text-decoration: underline; }
+.segmented.compact { margin: 0; flex: none; }
+.segmented.compact button { padding: 5px 12px; font-size: .85rem; }
+.stat .note { display: block; font-size: .76rem; color: var(--muted); margin-top: 2px; }
+.chart-wrap { position: relative; border: 1px solid var(--border); border-radius: 10px; padding: 8px 6px 0; background: var(--surface); }
+.chart-wrap svg { display: block; }
+.c-grid { stroke: var(--border); stroke-width: 1; }
+.c-axis { fill: var(--muted); font-size: 11px; }
+.c-bar { fill: var(--chart-1); }
+.c-hit { fill: transparent; cursor: default; outline: none; }
+.c-hit.on { fill: color-mix(in srgb, var(--text) 6%, transparent); }
+.c-tip { position: absolute; transform: translateX(-50%); background: var(--text); color: var(--bg); font-size: .8rem; font-weight: 600; padding: 4px 10px; border-radius: 6px; pointer-events: none; white-space: nowrap; }
+.grid th.num, .grid td.num { text-align: right; }
+.bad-text { color: var(--bad); font-weight: 700; }
+select:disabled, input:disabled { opacity: .55; }

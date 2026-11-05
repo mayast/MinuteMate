@@ -1,0 +1,10 @@
+{
+  "_purpose": "Tricky case: proposals and open debates are NOT decisions; an unowned task keeps an empty owner.",
+  "action_items": [
+    { "title": "Pull Q2 vendor quality scores", "owner_name": "", "due_date": "" },
+    { "title": "Check with engineering whether the publishing pipeline can handle weekly delivery batches", "owner_name": "", "due_date": "" },
+    { "title": "Send updated glossary to the vendor", "owner_name": "Laura Chen", "due_date": "" }
+  ],
+  "risks": [],
+  "decisions": []
+}

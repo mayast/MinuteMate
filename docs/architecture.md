@@ -48,6 +48,10 @@ The website also uses: Projects → Project Code, Auto-capture Keywords, Start/T
 Meetings → Capture Mode, Meeting Start/End, Teams Join Link, Organizer Email, Series Id, Transcript Attempts;
 Action Items → Owner Email.
 
+Phase 5 adds: Projects → Track Work In, Tracker Target, Transcript Retention (days), Post Recap to Meeting Chat,
+Post Agenda Before Meeting; Meetings → Teams Meeting Chat Id, Recap Posted, Agenda Posted, Transcript Purged;
+Action Items → Source, Closed Date, Tracker Item Id, Tracker Item, Sync State, Seen in Meetings.
+
 ## Design choices
 
 - **Human in the loop.** The AI never publishes. Status posts wait for approval; meetings it isn't sure about
@@ -65,4 +69,5 @@ Action Items → Owner Email.
 | 2 | Weekly status draft → approval → News post | This kit |
 | 3 | Pick meetings to capture (single, series, keyword rules, or invite MinuteMate); transcript queue with retry; Flow 4 sweeps for transcripts | This kit (Flow 4 needs admin setup) |
 | 4 | Kickoff kit with AI charter, timeline and dependency view with slip alerts, full tracker | This kit |
-| 5 | Portfolio view across projects, Power BI reporting, Teams app packaging | Ideas |
+| 5 | Tracker sync (Planner, Azure DevOps, GitHub), meeting-chat recap and agenda, actionable cards, duplicate checking, AI eval, privacy and retention, Impact tab, packaging and Teams app | This kit (see `docs/roadmap.md`) |
+| 6 | Portfolio view across projects, Power BI reporting, Teams single sign-on | Ideas |

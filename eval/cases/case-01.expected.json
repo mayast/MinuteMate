@@ -1,0 +1,16 @@
+{
+  "action_items": [
+    { "title": "Send updated timeline to stakeholders", "owner_name": "Priya Patel", "due_date": "2026-05-29" },
+    { "title": "Book review session with language leads for Japanese and German UI strings", "owner_name": "Laura Chen", "due_date": "" },
+    { "title": "Confirm vendor penalty clause with procurement", "owner_name": "Maya Stewart", "due_date": "2026-05-30" },
+    { "title": "Weekly Monday check-in with the vendor", "owner_name": "Ken Sato", "due_date": "" }
+  ],
+  "risks": [
+    { "title": "Vendor API may slip again" },
+    { "title": "Japanese and German UI strings not reviewed" }
+  ],
+  "decisions": [
+    { "title": "Launch moved to June 12" },
+    { "title": "Beta scope signed off, no more scope changes" }
+  ]
+}

@@ -113,31 +113,44 @@ export function createDemoData() {
     projects: [
       { id: "1", Title: "Project Phoenix", ProjectCode: "PHX", ProjectOwnerEmail: "maya@contoso.com", ApproverEmail: "dana.lee@contoso.com",
         DefaultNotifyVia: "Teams", WeeklyStatusOn: true, OverallStatus: "At risk", AutoCaptureKeywords: "Phoenix, go/no-go",
-        StartDate: at(-30), TargetDate: at(45) },
+        StartDate: at(-30), TargetDate: at(45), WorkTracker: "Azure DevOps", TrackerTarget: "contoso/Phoenix",
+        TranscriptRetentionDays: 30, PostRecapToChat: true, PostAgendaToChat: true },
       { id: "2", Title: "Website Localization 2027", ProjectCode: "LOC27", ProjectOwnerEmail: "maya@contoso.com", ApproverEmail: "ken.sato@contoso.com",
         DefaultNotifyVia: "Teams and Outlook", WeeklyStatusOn: true, OverallStatus: "On track", AutoCaptureKeywords: "localization",
-        StartDate: at(-10), TargetDate: at(80) }
+        StartDate: at(-10), TargetDate: at(80), WorkTracker: "Planner", TrackerTarget: "",
+        TranscriptRetentionDays: 90, PostRecapToChat: true, PostAgendaToChat: false }
     ],
     meetings: [
-      { id: "11", Title: "Phoenix weekly sync", ProjectLookupId: "1", MeetingStart: at(-7, 10), ProcessingStatus: "Done", CaptureMode: "Teams transcript", JoinUrl: "https://teams.microsoft.com/l/meetup-join/demo-past-1", NotesPage: { Url: "#" } },
+      { id: "15", Title: "Phoenix weekly sync", ProjectLookupId: "1", MeetingStart: at(-28, 10), ProcessingStatus: "Done", CaptureMode: "Teams transcript", JoinUrl: "https://teams.microsoft.com/l/meetup-join/demo-past-5", SeriesId: "s-phx", RecapPosted: true },
+      { id: "16", Title: "Phoenix weekly sync", ProjectLookupId: "1", MeetingStart: at(-21, 10), ProcessingStatus: "Done", CaptureMode: "Teams transcript", JoinUrl: "https://teams.microsoft.com/l/meetup-join/demo-past-6", SeriesId: "s-phx", RecapPosted: true },
+      { id: "17", Title: "Phoenix weekly sync", ProjectLookupId: "1", MeetingStart: at(-14, 10), ProcessingStatus: "Done", CaptureMode: "Teams transcript", JoinUrl: "https://teams.microsoft.com/l/meetup-join/demo-past-7", SeriesId: "s-phx", RecapPosted: true },
+      { id: "18", Title: "Vendor API kickoff", ProjectLookupId: "1", MeetingStart: at(-25, 14), ProcessingStatus: "Done", CaptureMode: "Teams transcript", JoinUrl: "https://teams.microsoft.com/l/meetup-join/demo-past-8", RecapPosted: true },
+      { id: "11", Title: "Phoenix weekly sync", ProjectLookupId: "1", MeetingStart: at(-7, 10), ProcessingStatus: "Done", SeriesId: "s-phx", RecapPosted: true, CaptureMode: "Teams transcript", JoinUrl: "https://teams.microsoft.com/l/meetup-join/demo-past-1", NotesPage: { Url: "#" } },
       { id: "12", Title: "Vendor API checkpoint", ProjectLookupId: "1", MeetingStart: at(-2, 14), ProcessingStatus: "Needs review", CaptureMode: "Teams transcript", JoinUrl: "https://teams.microsoft.com/l/meetup-join/demo-past-2" },
       { id: "14", Title: "Design sync", ProjectLookupId: "1", MeetingStart: at(-1, 11), ProcessingStatus: "Error", CaptureMode: "Teams transcript", TranscriptAttempts: 12, JoinUrl: "https://teams.microsoft.com/l/meetup-join/demo-past-3" },
+      { id: "19", Title: "Phoenix weekly sync", ProjectLookupId: "1", MeetingStart: at(7, 10), MeetingEnd: at(7, 10, 45), ProcessingStatus: "Waiting for transcript", CaptureMode: "Teams transcript", JoinUrl: "https://teams.microsoft.com/l/meetup-join/demo-5", SeriesId: "s-phx" },
       { id: "13", Title: "Phoenix weekly sync", ProjectLookupId: "1", MeetingStart: at(0, 10), MeetingEnd: at(0, 10, 45), ProcessingStatus: "Waiting for transcript", CaptureMode: "Teams transcript", JoinUrl: "https://teams.microsoft.com/l/meetup-join/demo-1", SeriesId: "s-phx" }
     ],
     actions: [
-      { id: "21", Title: "Send revised timeline to stakeholders", ProjectLookupId: "1", OwnerAsWritten: "Priya Patel", OwnerEmail: "priya.patel@contoso.com", DueDate: at(1), ItemStatus: "In progress", Priority: "High" },
-      { id: "22", Title: "Book JA/DE string review with language leads", ProjectLookupId: "1", OwnerAsWritten: "Laura Chen", OwnerEmail: "laura.chen@contoso.com", DueDate: at(5), ItemStatus: "Not started", Priority: "Medium" },
-      { id: "23", Title: "Confirm vendor penalty clause with procurement", ProjectLookupId: "1", OwnerAsWritten: "Maya Stewart", OwnerEmail: "maya@contoso.com", DueDate: at(-1), ItemStatus: "Not started", Priority: "High" },
-      { id: "25", Title: "Update beta FAQ for support team", ProjectLookupId: "1", OwnerAsWritten: "Ken Sato", OwnerEmail: "ken.sato@contoso.com", DueDate: at(-3), ItemStatus: "Done", Priority: "Low" },
+      { id: "21", Title: "Send revised timeline to stakeholders", ProjectLookupId: "1", OwnerAsWritten: "Priya Patel", OwnerEmail: "priya.patel@contoso.com", DueDate: at(1), ItemStatus: "In progress", Priority: "High", Source: "Meeting", Created: at(-7), SourceMeetingLookupId: "11", SeenInMeetings: 2, ExternalLink: { Url: "https://dev.azure.com/contoso/Phoenix/_workitems/edit/4812" }, SyncState: "Synced" },
+      { id: "22", Title: "Book JA/DE string review with language leads", ProjectLookupId: "1", OwnerAsWritten: "Laura Chen", OwnerEmail: "laura.chen@contoso.com", DueDate: at(5), ItemStatus: "Not started", Priority: "Medium", Source: "Meeting", Created: at(-2), SourceMeetingLookupId: "12", ExternalLink: { Url: "https://dev.azure.com/contoso/Phoenix/_workitems/edit/4830" }, SyncState: "Synced" },
+      { id: "23", Title: "Confirm vendor penalty clause with procurement", ProjectLookupId: "1", OwnerAsWritten: "Maya Stewart", OwnerEmail: "maya@contoso.com", DueDate: at(-1), ItemStatus: "Not started", Priority: "High", Source: "Meeting", Created: at(-7), SourceMeetingLookupId: "11", SyncState: "Error" },
+      { id: "25", Title: "Update beta FAQ for support team", ProjectLookupId: "1", OwnerAsWritten: "Ken Sato", OwnerEmail: "ken.sato@contoso.com", DueDate: at(-3), ItemStatus: "Done", Priority: "Low", Source: "Meeting", Created: at(-14), ClosedDate: at(-4), SourceMeetingLookupId: "17", SyncState: "Synced" },
+      { id: "26", Title: "Share vendor API test plan", ProjectLookupId: "1", OwnerAsWritten: "Ken Sato", OwnerEmail: "ken.sato@contoso.com", DueDate: at(-20), ItemStatus: "Done", Priority: "High", Source: "Meeting", Created: at(-25), ClosedDate: at(-21), SourceMeetingLookupId: "18" },
+      { id: "27", Title: "Draft beta announcement", ProjectLookupId: "1", OwnerAsWritten: "Dana Lee", OwnerEmail: "dana.lee@contoso.com", DueDate: at(-15), ItemStatus: "Done", Priority: "Medium", Source: "Meeting", Created: at(-21), ClosedDate: at(-13), SourceMeetingLookupId: "16" },
+      { id: "28", Title: "Confirm beta customer list", ProjectLookupId: "1", OwnerAsWritten: "Priya Patel", OwnerEmail: "priya.patel@contoso.com", DueDate: at(-10), ItemStatus: "Done", Priority: "High", Source: "Meeting", Created: at(-21), ClosedDate: at(-11), SourceMeetingLookupId: "16" },
+      { id: "29", Title: "Set up beta telemetry dashboard", ProjectLookupId: "1", OwnerAsWritten: "Ken Sato", OwnerEmail: "ken.sato@contoso.com", DueDate: at(-6), ItemStatus: "Done", Priority: "Medium", Source: "Manual", Created: at(-18), ClosedDate: at(-6) },
+      { id: "30", Title: "Review support escalation path", ProjectLookupId: "1", OwnerAsWritten: "Maya Stewart", OwnerEmail: "maya@contoso.com", DueDate: at(-24), ItemStatus: "Done", Priority: "Low", Source: "Meeting", Created: at(-28), ClosedDate: at(-25), SourceMeetingLookupId: "15" },
+      { id: "31", Title: "Agree on launch success metrics", ProjectLookupId: "1", OwnerAsWritten: "Dana Lee", OwnerEmail: "dana.lee@contoso.com", DueDate: at(-12), ItemStatus: "Done", Priority: "High", Source: "Meeting", Created: at(-14), ClosedDate: at(-9), SourceMeetingLookupId: "17" },
       { id: "24", Title: "Draft localization style guide v2", ProjectLookupId: "2", OwnerAsWritten: "Ken Sato", OwnerEmail: "ken.sato@contoso.com", DueDate: at(8), ItemStatus: "Not started", Priority: "Low" }
     ],
     risks: [
-      { id: "31", Title: "Vendor API may slip again", ProjectLookupId: "1", Impact: "High", Likelihood: "Medium", Mitigation: "Weekly vendor check-in; manual CSV import fallback", RiskStatus: "Mitigating" },
-      { id: "32", Title: "Localized strings not reviewed before beta", ProjectLookupId: "1", Impact: "Medium", Likelihood: "High", Mitigation: "Book review with language leads", RiskStatus: "Open" }
+      { id: "33", Title: "Vendor API may slip again", ProjectLookupId: "1", Impact: "High", Likelihood: "Medium", Mitigation: "Weekly vendor check-in; manual CSV import fallback", RiskStatus: "Mitigating" },
+      { id: "34", Title: "Localized strings not reviewed before beta", ProjectLookupId: "1", SourceMeetingLookupId: "12", Created: at(-2), Impact: "Medium", Likelihood: "High", Mitigation: "Book review with language leads", RiskStatus: "Open" }
     ],
     decisions: [
-      { id: "51", Title: "Launch moved from June 5 to June 12", ProjectLookupId: "1", DecisionDate: at(-7), DecidedBy: "Steering group", Rationale: "Vendor API not ready" },
-      { id: "52", Title: "Beta scope frozen", ProjectLookupId: "1", DecisionDate: at(-7), DecidedBy: "Product and engineering", Rationale: "Protect the launch date" }
+      { id: "51", Title: "Launch moved from June 5 to June 12", ProjectLookupId: "1", SourceMeetingLookupId: "11", DecisionDate: at(-7), DecidedBy: "Steering group", Rationale: "Vendor API not ready" },
+      { id: "52", Title: "Beta scope frozen", ProjectLookupId: "1", SourceMeetingLookupId: "11", DecisionDate: at(-7), DecidedBy: "Product and engineering", Rationale: "Protect the launch date" }
     ],
     status: [
       { id: "41", Title: "Project Phoenix — Status, last week", ProjectLookupId: "1", WeekOf: at(-7), OverallStatus: "At risk", ApprovalStatus: "Published" },
@@ -167,6 +180,7 @@ export function createDemoData() {
   const calendar = [
     { id: "e1", title: "Phoenix weekly sync", joinUrl: "https://teams.microsoft.com/l/meetup-join/demo-1", start: at(0, 10), end: at(0, 10, 45), organizer: "maya@contoso.com", seriesId: "s-phx" },
     { id: "e2", title: "Localization vendor QBR", joinUrl: "https://teams.microsoft.com/l/meetup-join/demo-2", start: at(1, 13), end: at(1, 14), organizer: "ken.sato@contoso.com", seriesId: "" },
+    { id: "e7", title: "Exec 1:1 [no-capture]", joinUrl: "https://teams.microsoft.com/l/meetup-join/demo-7", start: at(2, 16), end: at(2, 16, 30), organizer: "dana.lee@contoso.com", seriesId: "" },
     { id: "e3", title: "Beta go/no-go", joinUrl: "https://teams.microsoft.com/l/meetup-join/demo-3", start: at(3, 9, 30), end: at(3, 10, 30), organizer: "dana.lee@contoso.com", seriesId: "" },
     { id: "e5", title: "Phoenix weekly sync", joinUrl: "https://teams.microsoft.com/l/meetup-join/demo-5", start: at(7, 10), end: at(7, 10, 45), organizer: "maya@contoso.com", seriesId: "s-phx" },
     { id: "e4", title: "Design review: status dashboard", joinUrl: "https://teams.microsoft.com/l/meetup-join/demo-4", start: at(4, 15), end: at(4, 15, 30), organizer: "maya@contoso.com", seriesId: "" },
@@ -181,7 +195,7 @@ export function createDemoData() {
     async init() {},
     async me() { return { name: "Maya Stewart (demo)", email: "maya@contoso.com" }; },
     async items(key) { return wait(db[key].map((x) => normalize(key, x))); },
-    async create(key, fields) { const item = { id: String(++seq), ...fields }; if (key === "milestones") item.DependsOnIds = item.DependsOnIds || []; db[key].push(item); return wait({ id: item.id }); },
+    async create(key, fields) { const item = { id: String(++seq), Created: new Date().toISOString(), ...fields }; if (key === "milestones") item.DependsOnIds = item.DependsOnIds || []; db[key].push(item); return wait({ id: item.id }); },
     async update(key, id, fields) { Object.assign(db[key].find((x) => x.id === id), fields); return wait(null); },
     async remove(key, id) { db[key] = db[key].filter((x) => x.id !== id); return wait(null); },
     async setDeps(id, ids) { db.milestones.find((x) => x.id === id).DependsOnIds = ids.map(String); return wait(null); },

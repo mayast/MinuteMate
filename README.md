@@ -7,7 +7,7 @@ status update, all inside SharePoint, Teams and Outlook. Built for project manag
 they pick the meetings to capture (or invite MinuteMate), and the rest happens automatically. A person approves
 every status update before it is published.
 
-**Phases 1–4.** See [docs/architecture.md](docs/architecture.md) for the diagram and roadmap.
+**Phases 1–5.** See [docs/architecture.md](docs/architecture.md) for the diagram and [docs/roadmap.md](docs/roadmap.md) for the plan.
 Try the website with sample data: `web/index.html?demo=1`.
 
 ## What it does
@@ -24,8 +24,13 @@ Try the website with sample data: `web/index.html?demo=1`.
 5. **Track** — the website's Tracker edits action items, risks, decisions and milestones in one table;
    the Timeline shows milestones by workstream with dependency arrows and flags conflicts. Owners of dependent
    milestones are warned in Teams when something slips (Flow 7).
-6. **Report** — every Friday, AI drafts each project's status update as a draft SharePoint page.
-7. **Approve** — the project's approver reviews (and can edit) the draft. On approval it is published as a
+   Action items also go to the team's own tracker (Planner, Azure DevOps or GitHub), and status comes back (Flow 8).
+   Owners can update status and due dates right from the Teams card.
+6. **Follow through in Teams** — the recap lands in the meeting chat right after processing (Flow 9), and an agenda
+   with open, overdue and at-risk items arrives before the next meeting (Flow 10). The **Impact** tab shows meetings
+   captured, items found, on-time close rate and estimated hours saved.
+7. **Report** — every Friday, AI drafts each project's status update as a draft SharePoint page.
+8. **Approve** — the project's approver reviews (and can edit) the draft. On approval it is published as a
    SharePoint **News post**; on rejection the comments go back to the project owner.
 
 ## What's in this repo
@@ -45,6 +50,15 @@ Try the website with sample data: `web/index.html?demo=1`.
 | `flows/05-capture-from-invite.md` | Flow 5: capture meetings when the MinuteMate mailbox is invited |
 | `flows/06-kickoff-charter.md` | Flow 6: kickoff kit → AI charter page for review |
 | `flows/07-milestone-slip-alert.md` | Flow 7: warn dependent owners when a milestone slips |
+| `flows/08-sync-work-tracker.md` | Flow 8: sync action items with Planner, Azure DevOps or GitHub |
+| `flows/09-post-meeting-recap.md` | Flow 9: post the recap to the Teams meeting chat |
+| `flows/10-pre-meeting-agenda.md` | Flow 10: post an agenda before the next meeting |
+| `flows/11-transcript-retention.md` | Flow 11: delete raw transcripts after the retention period |
+| `eval/` | AI quality evaluation: test meetings, expected results, scoring script |
+| `docs/privacy.md` | What's stored, attendee notice, `[no-capture]` opt-out, retention |
+| `docs/install.md` | Package as a Power Platform solution; add MinuteMate to Teams |
+| `teams-app/` | Teams app manifest and icons (opens the website as a tab) |
+| `docs/roadmap.md` | The plan and what's built |
 | `docs/sharepoint-pages-rest.md` | How the flows create, save and publish SharePoint pages |
 | `templates/` | Teams card, Outlook email, and status, meeting notes and charter page HTML |
 | `samples/sample-meeting-notes.txt` | Notes for testing |
@@ -73,6 +87,8 @@ Try the website with sample data: `web/index.html?demo=1`.
 5. **Website:** follow `docs/setup-website.md`.
 6. **Automatic capture (Phase 3):** Flow 4 (needs admin setup), then Flow 5 if you want invite-based capture.
 7. **Planning (Phase 4):** Flow 6 (charter) and Flow 7 (slip alerts).
+   **Follow-through (Phase 5):** Flow 8 (tracker sync), Flow 9 (recap), Flow 10 (agenda), Flow 11 (retention);
+   read `docs/privacy.md` before rollout and run `node eval/score.mjs` after any prompt change.
 8. **Test end to end** with `samples/sample-meeting-notes.txt`, then run Flow 2 manually and approve.
 9. **Share with your team:** give project managers Contribute access to the site, pin the Meetings list
    to the site navigation, and add the News web part to the home page.

@@ -1,0 +1,11 @@
+{
+  "_note": "Illustrative output used to demonstrate the scorer. It is not a real model run; replace it with your prompt's actual JSON.",
+  "summary": "Beta scope is confirmed and launch moves to June 12 because the vendor API slipped.",
+  "action_items": [
+    { "title": "Send the updated timeline to stakeholders", "owner_name": "Priya", "due_date": "2026-05-29", "matches_existing_id": "" },
+    { "title": "Book a review session with the language leads", "owner_name": "Laura Chen", "due_date": "2026-06-05", "matches_existing_id": "" },
+    { "title": "Confirm the vendor penalty clause with procurement", "owner_name": "Maya Stewart", "due_date": "2026-05-30", "matches_existing_id": "" }
+  ],
+  "risks": [ { "title": "Vendor API delivery may slip again" } ],
+  "decisions": [ { "title": "Launch moved to June 12" }, { "title": "Fall back to manual CSV import" } ]
+}

@@ -1,0 +1,34 @@
+{
+  "type": "AdaptiveCard",
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "version": "1.4",
+  "body": [
+    { "type": "TextBlock", "text": "MinuteMate: a new action item for you", "weight": "Bolder", "size": "Medium" },
+    { "type": "TextBlock", "text": "${Title}", "wrap": true, "size": "Large", "weight": "Bolder" },
+    {
+      "type": "FactSet",
+      "facts": [
+        { "title": "Project", "value": "${ProjectName}" },
+        { "title": "Due", "value": "${DueText}" },
+        { "title": "Priority", "value": "${Priority}" }
+      ]
+    },
+    { "type": "TextBlock", "text": "${Details}", "wrap": true, "spacing": "Medium" },
+    { "type": "TextBlock", "text": "Update it here", "weight": "Bolder", "spacing": "Large" },
+    {
+      "type": "Input.ChoiceSet", "id": "status", "label": "Status", "value": "${CurrentStatus}", "style": "compact",
+      "choices": [
+        { "title": "Not started", "value": "Not started" },
+        { "title": "In progress", "value": "In progress" },
+        { "title": "Blocked", "value": "Blocked" },
+        { "title": "Done", "value": "Done" }
+      ]
+    },
+    { "type": "Input.Date", "id": "due", "label": "Due date", "value": "${DueIso}" },
+    { "type": "Input.Text", "id": "note", "label": "Note (optional)", "isMultiline": true, "placeholder": "e.g. waiting on vendor reply" }
+  ],
+  "actions": [
+    { "type": "Action.Submit", "title": "Update", "data": { "itemId": "${ItemId}" } },
+    { "type": "Action.OpenUrl", "title": "Open in MinuteMate", "url": "${ItemLink}" }
+  ]
+}

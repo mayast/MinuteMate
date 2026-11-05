@@ -53,11 +53,22 @@ if(empty(triggerOutputs()?['body/DueDate']), 'No due date', formatDateTime(trigg
 ```
 
 ### 6. Condition **Use Teams** — `contains(outputs('Channel'), 'Teams')` is equal to `true`
-- **Yes:** Microsoft Teams *Post card in a chat or channel*
-  - Post as: **Flow bot** · Post in: **Chat with Flow bot**
-  - Recipient: `outputs('Owner_Email')`
-  - Adaptive Card: paste `templates/action-item-card.json`, then replace the `${...}` placeholders
-    with dynamic content (title, project, due text, priority, details, item link).
+- **Yes (actionable card, recommended):** Microsoft Teams *Post adaptive card and wait for a response*
+  - Post as: **Flow bot** · Post in: **Chat with Flow bot** · Recipient: `outputs('Owner_Email')`
+  - Message: paste `templates/action-item-card-actionable.json` and replace the `${...}` placeholders
+    (`CurrentStatus` = `triggerOutputs()?['body/ItemStatus/Value']`, `DueIso` = `formatDateTime(triggerOutputs()?['body/DueDate'], 'yyyy-MM-dd')`,
+    `ItemId` = `triggerOutputs()?['body/ID']`).
+  - Update message: "Thanks, MinuteMate updated this item."
+  - Settings → Timeout: `P14D` (the run waits up to 14 days for the owner to respond, then ends quietly).
+  - Because this action waits, put it in a **parallel branch** next to step 7 so the Outlook email isn't delayed,
+    and do step 8 (**Mark Notified**) *before* the card so the item isn't notified twice.
+  - After the response, SharePoint *Update item* (Action Items, Id = `triggerOutputs()?['body/ID']`):
+    - Status: `body('Post_adaptive_card_and_wait_for_a_response')?['data']?['status']`
+    - Due Date: `body('Post_adaptive_card_and_wait_for_a_response')?['data']?['due']`
+    - Closed Date: `if(equals(body('Post_adaptive_card_and_wait_for_a_response')?['data']?['status'], 'Done'), utcNow(), null)`
+    - Details: append the note, if any
+  - If the item is linked to a work tracker, Flow 8 copies the new status there.
+- **Yes (simple card):** *Post card in a chat or channel* with `templates/action-item-card.json` (no buttons).
 
 ### 7. Condition **Use Outlook** — `contains(outputs('Channel'), 'Outlook')` is equal to `true`
 - **Yes:** Office 365 Outlook *Send an email (V2)*

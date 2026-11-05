@@ -11,5 +11,7 @@ window.MINUTEMATE_CONFIG = {
   // How far ahead to look for Teams meetings in the meeting picker
   meetingLookaheadDays: 14,
   // Optional: mailbox people can add to invites so meetings are captured automatically (Flow 5), e.g. "minutemate@contoso.com"
-  inviteAddress: ""
+  inviteAddress: "",
+  // Impact tab: estimated minutes of note-taking and follow-up saved per processed meeting
+  minutesSavedPerMeeting: 30
 };

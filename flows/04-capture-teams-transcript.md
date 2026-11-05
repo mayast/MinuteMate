@@ -50,6 +50,11 @@ Client ID / Secret from the backend app.
   ```
 - Top Count: 50
 
+### 2b. Privacy opt-out
+Inside the loop below, first check: if `contains(toLower(items('Each_Meeting')?['Title']), '[no-capture]')`,
+set Processing Status to `Error` with no email and skip the rest. (The website and Flow 5 already refuse these;
+this catches meetings renamed after capture.)
+
 ### 3. **Each Meeting** — *Apply to each* over `body('Due_Meetings')?['value']`
 Settings → Concurrency control: **on**, degree **5**. Inside the loop, add a **Scope** named **Try** with steps 3a–3e.
 
@@ -62,6 +67,9 @@ https://graph.microsoft.com/v1.0/users/@{items('Each_Meeting')?['OrganizerEmail'
 ```
 https://graph.microsoft.com/v1.0/users/@{body('Get_Organizer')?['id']}/onlineMeetings?$filter=JoinWebUrl eq '@{encodeUriComponent(items('Each_Meeting')?['JoinUrl'])}'
 ```
+
+Save the meeting chat for Flows 9 and 10: *Update item* (Meetings) → Teams Meeting Chat Id =
+`first(body('Find_Meeting')?['value'])?['chatInfo']?['threadId']`
 
 **3c. List Transcripts** — *HTTP* `GET`
 ```
