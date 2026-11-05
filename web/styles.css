@@ -296,3 +296,17 @@ a.ext:hover { text-decoration: underline; }
 .grid th.num, .grid td.num { text-align: right; }
 .bad-text { color: var(--bad); font-weight: 700; }
 select:disabled, input:disabled { opacity: .55; }
+
+/* ---------- Setup ---------- */
+.setup-only .project-bar, .setup-only .tabs { display: none; }
+.connect { max-width: 620px; margin: 8px auto; }
+.connect-form { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin: 16px 0; }
+.connect-form label { flex-basis: 100%; font-weight: 600; }
+.connect-form input { flex: 1 1 280px; width: auto; }
+.error-text { color: var(--bad); font-weight: 600; }
+.mono { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: .86em; overflow-wrap: anywhere; }
+.row-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.setup-summary { display: flex; flex-direction: column; gap: 2px; border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+.setup-summary.ok { background: color-mix(in srgb, var(--ok) 12%, transparent); }
+.setup-summary.warn { background: color-mix(in srgb, var(--warn) 14%, transparent); }
+.steps { margin: 0 0 12px; padding-left: 20px; display: grid; gap: 6px; }

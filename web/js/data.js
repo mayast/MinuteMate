@@ -1,8 +1,33 @@
 // Data access: Microsoft Graph (as the signed-in user) or in-memory sample data for ?demo=1.
 // Every list item comes back as a flat object: { id, Title, ProjectLookupId, ...fields }.
 import { accessToken } from "./auth.js";
+import { REQUIRED } from "./schema.js";
 
 const CFG = window.MINUTEMATE_CONFIG || {};
+
+// ------------------------------------------------------------------ which SharePoint site
+// The site comes from (1) what this person entered on the Setup screen, saved in their browser,
+// or (2) config.js. People only need to enter it once, so a team can share one website.
+const SITE_KEY = "mm_site";
+const PLACEHOLDER_HOSTS = ["", "contoso.sharepoint.com"];
+export function parseSiteUrl(text) {
+  try {
+    const u = new URL(String(text).trim());
+    if (!/\.sharepoint\.(com|us|de|cn)$/i.test(u.hostname)) return null;
+    const m = u.pathname.match(/^\/(sites|teams)\/[^/]+/i);
+    return { host: u.hostname, path: m ? m[0] : "", url: `https://${u.hostname}${m ? m[0] : ""}` };
+  } catch { return null; }
+}
+export function resolveSite() {
+  try { const saved = localStorage.getItem(SITE_KEY); if (saved && parseSiteUrl(saved)) return parseSiteUrl(saved); } catch { /* storage blocked */ }
+  if (CFG.siteUrl) return parseSiteUrl(CFG.siteUrl);
+  if (!PLACEHOLDER_HOSTS.includes(CFG.siteHostname || "")) return parseSiteUrl(`https://${CFG.siteHostname}${CFG.sitePath || ""}`);
+  return null;
+}
+export function saveSite(site) {
+  try { localStorage.setItem(SITE_KEY, site.url); return true; } catch { return false; }
+}
+export function clearSite() { try { localStorage.removeItem(SITE_KEY); } catch { /* ignore */ } }
 
 // list key → list URL name created by provisioning/Setup-MinuteMate.ps1
 export const LISTS = {
@@ -38,23 +63,46 @@ async function graph(path, { method = "GET", body, headers = {} } = {}) {
 
 export const GraphData = {
   siteId: null,
+  site: null,
   listIds: {},
-  async init() {
-    const site = await graph(`/sites/${CFG.siteHostname}:${CFG.sitePath}`);
-    this.siteId = site.id;
+  missingLists: [],
+  async init(site) {
+    let found;
+    try { found = await graph(`/sites/${site.host}:${site.path || "/"}`); }
+    catch (e) { throw new Error(`Couldn't open the SharePoint site ${site.url}. Check the address, and that you have access to it. (${e.message})`); }
+    this.siteId = found.id;
+    this.site = { name: found.displayName, url: found.webUrl };
     const lists = await graph(`/sites/${this.siteId}/lists?$select=id,displayName,webUrl&$top=200`);
-    const missing = [];
+    this.listIds = {};
+    this.missingLists = [];
     for (const [key, urlName] of Object.entries(LISTS)) {
       const l = lists.value.find((x) => decodeURIComponent(x.webUrl).toLowerCase().endsWith(`/lists/${urlName.toLowerCase()}`));
-      if (l) this.listIds[key] = l.id; else missing.push(urlName);
+      if (l) this.listIds[key] = l.id; else this.missingLists.push(urlName);
     }
-    if (missing.length) throw new Error(`Missing lists: ${missing.join(", ")}. Re-run provisioning/Setup-MinuteMate.ps1 on ${CFG.sitePath}.`);
+  },
+  async checkSetup() {
+    const results = [];
+    for (const [urlName, req] of Object.entries(REQUIRED)) {
+      const key = Object.keys(LISTS).find((k) => LISTS[k] === urlName);
+      const id = this.listIds[key];
+      if (!id) { results.push({ title: req.title, exists: false, missing: req.columns, notes: [] }); continue; }
+      const cols = await graph(`/sites/${this.siteId}/lists/${id}/columns?$select=name,choice&$top=500`);
+      const names = new Set(cols.value.map((c) => c.name));
+      const notes = [];
+      if (urlName === "Meetings") {
+        const ps = cols.value.find((c) => c.name === "ProcessingStatus");
+        if (ps?.choice && !ps.choice.choices.includes("Waiting for transcript")) notes.push("Processing Status is missing the choice \"Waiting for transcript\". Add it in List settings.");
+      }
+      results.push({ title: req.title, exists: true, missing: req.columns.filter((c) => !names.has(c)), notes });
+    }
+    return { site: this.site, lists: results };
   },
   async me() {
     const m = await graph("/me?$select=displayName,mail,userPrincipalName");
     return { name: m.displayName, email: m.mail || m.userPrincipalName };
   },
   async items(key) {
+    if (!this.listIds[key]) return [];
     let next = `/sites/${this.siteId}/lists/${this.listIds[key]}/items?$expand=fields&$top=500`;
     const out = [];
     for (let i = 0; next && i < 10; i++) {
@@ -192,8 +240,13 @@ export function createDemoData() {
   ];
   const wait = (v) => new Promise((r) => setTimeout(() => r(structuredClone(v)), 60));
   return {
+    site: { name: "Project Hub (demo)", url: "https://contoso.sharepoint.com/sites/ProjectHub" },
+    missingLists: [],
     async init() {},
     async me() { return { name: "Maya Stewart (demo)", email: "maya@contoso.com" }; },
+    async checkSetup() {
+      return wait({ site: this.site, lists: Object.values(REQUIRED).map((r) => ({ title: r.title, exists: true, missing: [], notes: [] })) });
+    },
     async items(key) { return wait(db[key].map((x) => normalize(key, x))); },
     async create(key, fields) { const item = { id: String(++seq), Created: new Date().toISOString(), ...fields }; if (key === "milestones") item.DependsOnIds = item.DependsOnIds || []; db[key].push(item); return wait({ id: item.id }); },
     async update(key, id, fields) { Object.assign(db[key].find((x) => x.id === id), fields); return wait(null); },

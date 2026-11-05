@@ -1,19 +1,20 @@
 // MinuteMate website: boot, shared state and tab routing.
 import { $, $$, esc, toast, banner } from "./ui.js";
 import { signIn, signOut, handleRedirect, accessToken } from "./auth.js";
-import { GraphData, createDemoData, LISTS } from "./data.js";
+import { GraphData, createDemoData, LISTS, resolveSite } from "./data.js";
 import * as overview from "./views/overview.js";
 import * as meetings from "./views/meetings.js";
 import * as tracker from "./views/tracker.js";
 import * as timeline from "./views/timeline.js";
 import * as settings from "./views/settings.js";
 import * as impact from "./views/impact.js";
+import * as setup from "./views/setup.js";
 import * as kickoff from "./views/kickoff.js";
 
 const CFG = window.MINUTEMATE_CONFIG || {};
 // demoOnly: a hosted showcase copy with no Microsoft 365 connection (sample data only).
 const DEMO = new URLSearchParams(location.search).has("demo") || CFG.demoOnly === true;
-const VIEWS = { overview, meetings, tracker, timeline, impact, settings, kickoff };
+const VIEWS = { overview, meetings, tracker, timeline, impact, settings, kickoff, setup };
 
 const ctx = {
   cfg: CFG,
@@ -95,12 +96,25 @@ async function boot() {
     } else {
       banner(CFG.demoOnly ? "Demo with sample data. Nothing you change here is saved." : `Demo mode: sample data only, nothing is saved. <a href="${esc(location.pathname)}">Exit demo</a>`);
     }
-    await ctx.data.init();
     ctx.state.me = await ctx.data.me();
     $("#account").innerHTML = `<span>${esc(ctx.state.me.name)}</span>` + (DEMO ? "" : `<button class="btn ghost small" id="signoutBtn">Sign out</button>`);
     $("#signoutBtn")?.addEventListener("click", signOut);
+
+    // First visit: which SharePoint site? (entered once on the Setup screen, or set in config.js)
+    const site = DEMO ? null : resolveSite();
+    if (!DEMO) {
+      if (!site) return showSetupOnly();
+      try { await ctx.data.init(site); }
+      catch (e) { ctx.state.siteError = e.message; return showSetupOnly(); }
+    } else {
+      await ctx.data.init();
+    }
     await Promise.all([ctx.reload(), ctx.loadCalendar()]);
     $("#app").hidden = false;
+    if (ctx.data.missingLists.length) {
+      banner(`MinuteMate isn't fully set up on this site yet. The <strong>Setup</strong> tab shows what's missing.`);
+      return ctx.selectTab("setup");
+    }
     const startTab = new URLSearchParams(location.search).get("tab") || location.hash.replace("#", "");
     ctx.selectTab(VIEWS[startTab] ? startTab : (ctx.state.lists.projects.length ? "overview" : "kickoff"));
   } catch (err) {
@@ -108,6 +122,14 @@ async function boot() {
     banner(esc(err.message));
     toast(err.message);
   }
+}
+
+// Before a site is connected, show only the Setup screen.
+function showSetupOnly() {
+  ctx.state.needSite = true;
+  $("#app").hidden = false;
+  $("#app").classList.add("setup-only");
+  ctx.selectTab("setup");
 }
 
 boot();

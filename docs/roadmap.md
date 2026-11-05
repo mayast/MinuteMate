@@ -27,6 +27,17 @@ Power Automate, to build and test in your tenant.
 
 Out of scope: localized (non-English) summaries.
 
+## Phase 6: simple setup
+
+| # | Item | What ships | Status |
+|---|---|---|---|
+| 6.1 | **Layered setup** | README rewritten as Starter (20 min, no admin) → Website (5 min) → Automatic capture (IT) | Built |
+| 6.2 | **No PowerShell** | Flow 0 *Set up MinuteMate* creates all lists from `provisioning/lists.json`; safe to re-run for upgrades | Flow 0: guide |
+| 6.3 | **Website asks for the site** | First sign-in asks for the SharePoint site address and remembers it; no config edits | Built |
+| 6.4 | **Setup check** | Setup tab checks every list and column and gives the exact fix | Built |
+| 6.5 | **One-page IT request** | `docs/it-request.md` lists exactly what to approve for automatic capture | Built |
+| 6.6 | **One-click package** | Managed Power Platform solution attached to GitHub Releases | Maintainer: build once (see `docs/install.md`, part B) |
+
 ## Later ideas
 - Portfolio view across all projects.
 - Power BI report on the same lists.

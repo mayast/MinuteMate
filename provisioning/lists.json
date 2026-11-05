@@ -1,0 +1,763 @@
+{
+  "_about": "MinuteMate SharePoint lists. Generated from provisioning/Setup-MinuteMate.ps1; read by the Set up MinuteMate flow (flows/00-set-up-minutemate.md) and the website's setup check.",
+  "lists": [
+    {
+      "title": "Projects",
+      "url": "Projects",
+      "fields": [
+        {
+          "name": "ProjectOwner",
+          "display": "Project Owner",
+          "type": "User",
+          "schemaXml": "<Field Type='User' Name='ProjectOwner' StaticName='ProjectOwner' DisplayName='Project Owner' UserSelectionMode='PeopleOnly' />"
+        },
+        {
+          "name": "Approver",
+          "display": "Status Approver",
+          "type": "User",
+          "schemaXml": "<Field Type='User' Name='Approver' StaticName='Approver' DisplayName='Status Approver' UserSelectionMode='PeopleOnly' />"
+        },
+        {
+          "name": "ProjectOwnerEmail",
+          "display": "Project Owner Email",
+          "type": "Text",
+          "schemaXml": "<Field Type='Text' Name='ProjectOwnerEmail' StaticName='ProjectOwnerEmail' DisplayName='Project Owner Email' MaxLength='255' />"
+        },
+        {
+          "name": "ApproverEmail",
+          "display": "Status Approver Email",
+          "type": "Text",
+          "schemaXml": "<Field Type='Text' Name='ApproverEmail' StaticName='ApproverEmail' DisplayName='Status Approver Email' MaxLength='255' />"
+        },
+        {
+          "name": "DefaultNotifyVia",
+          "display": "Default Notify Via",
+          "type": "Choice",
+          "choices": [
+            "Teams",
+            "Outlook",
+            "Teams and Outlook"
+          ],
+          "default": "Teams",
+          "schemaXml": "<Field Type='Choice' Name='DefaultNotifyVia' StaticName='DefaultNotifyVia' DisplayName='Default Notify Via' Format='Dropdown'><Default>Teams</Default><CHOICES><CHOICE>Teams</CHOICE><CHOICE>Outlook</CHOICE><CHOICE>Teams and Outlook</CHOICE></CHOICES></Field>"
+        },
+        {
+          "name": "OverallStatus",
+          "display": "Overall Status",
+          "type": "Choice",
+          "choices": [
+            "On track",
+            "At risk",
+            "Off track"
+          ],
+          "default": "On track",
+          "schemaXml": "<Field Type='Choice' Name='OverallStatus' StaticName='OverallStatus' DisplayName='Overall Status' Format='Dropdown'><Default>On track</Default><CHOICES><CHOICE>On track</CHOICE><CHOICE>At risk</CHOICE><CHOICE>Off track</CHOICE></CHOICES></Field>"
+        },
+        {
+          "name": "WeeklyStatusOn",
+          "display": "Weekly Status On",
+          "type": "Boolean",
+          "schemaXml": "<Field Type='Boolean' Name='WeeklyStatusOn' StaticName='WeeklyStatusOn' DisplayName='Weekly Status On'><Default>0</Default></Field>"
+        },
+        {
+          "name": "ProjectCode",
+          "display": "Project Code",
+          "type": "Text",
+          "schemaXml": "<Field Type='Text' Name='ProjectCode' StaticName='ProjectCode' DisplayName='Project Code' MaxLength='255' />"
+        },
+        {
+          "name": "AutoCaptureKeywords",
+          "display": "Auto-capture Keywords",
+          "type": "Text",
+          "schemaXml": "<Field Type='Text' Name='AutoCaptureKeywords' StaticName='AutoCaptureKeywords' DisplayName='Auto-capture Keywords' MaxLength='255' />"
+        },
+        {
+          "name": "StartDate",
+          "display": "Start Date",
+          "type": "Date",
+          "schemaXml": "<Field Type='DateTime' Name='StartDate' StaticName='StartDate' DisplayName='Start Date' Format='DateOnly' />"
+        },
+        {
+          "name": "TargetDate",
+          "display": "Target Date",
+          "type": "Date",
+          "schemaXml": "<Field Type='DateTime' Name='TargetDate' StaticName='TargetDate' DisplayName='Target Date' Format='DateOnly' />"
+        },
+        {
+          "name": "WorkTracker",
+          "display": "Track Work In",
+          "type": "Choice",
+          "choices": [
+            "None",
+            "Planner",
+            "Azure DevOps",
+            "GitHub"
+          ],
+          "default": "None",
+          "schemaXml": "<Field Type='Choice' Name='WorkTracker' StaticName='WorkTracker' DisplayName='Track Work In' Format='Dropdown'><Default>None</Default><CHOICES><CHOICE>None</CHOICE><CHOICE>Planner</CHOICE><CHOICE>Azure DevOps</CHOICE><CHOICE>GitHub</CHOICE></CHOICES></Field>"
+        },
+        {
+          "name": "TrackerTarget",
+          "display": "Tracker Target",
+          "type": "Text",
+          "schemaXml": "<Field Type='Text' Name='TrackerTarget' StaticName='TrackerTarget' DisplayName='Tracker Target' MaxLength='255' />"
+        },
+        {
+          "name": "TranscriptRetentionDays",
+          "display": "Transcript Retention (days)",
+          "type": "Number",
+          "schemaXml": "<Field Type='Number' Name='TranscriptRetentionDays' StaticName='TranscriptRetentionDays' DisplayName='Transcript Retention (days)' Decimals='0'><Default>0</Default></Field>"
+        },
+        {
+          "name": "PostRecapToChat",
+          "display": "Post Recap to Meeting Chat",
+          "type": "Boolean",
+          "schemaXml": "<Field Type='Boolean' Name='PostRecapToChat' StaticName='PostRecapToChat' DisplayName='Post Recap to Meeting Chat'><Default>0</Default></Field>"
+        },
+        {
+          "name": "PostAgendaToChat",
+          "display": "Post Agenda Before Meeting",
+          "type": "Boolean",
+          "schemaXml": "<Field Type='Boolean' Name='PostAgendaToChat' StaticName='PostAgendaToChat' DisplayName='Post Agenda Before Meeting'><Default>0</Default></Field>"
+        }
+      ]
+    },
+    {
+      "title": "Meetings",
+      "url": "Meetings",
+      "fields": [
+        {
+          "name": "Project",
+          "display": "Project",
+          "type": "Lookup",
+          "lookupList": "Projects",
+          "schemaXml": "<Field Type='Lookup' Name='Project' StaticName='Project' DisplayName='Project' List='{ListId:Projects}' ShowField='Title' />"
+        },
+        {
+          "name": "MeetingDate",
+          "display": "Meeting Date",
+          "type": "Date",
+          "schemaXml": "<Field Type='DateTime' Name='MeetingDate' StaticName='MeetingDate' DisplayName='Meeting Date' Format='DateOnly' />"
+        },
+        {
+          "name": "Attendees",
+          "display": "Attendees",
+          "type": "UserMulti",
+          "schemaXml": "<Field Type='UserMulti' Mult='TRUE' Name='Attendees' StaticName='Attendees' DisplayName='Attendees' UserSelectionMode='PeopleOnly' />"
+        },
+        {
+          "name": "RawNotes",
+          "display": "Raw Notes or Transcript",
+          "type": "Note",
+          "rich": false,
+          "schemaXml": "<Field Type='Note' Name='RawNotes' StaticName='RawNotes' DisplayName='Raw Notes or Transcript' NumLines='10' RichText='FALSE' />"
+        },
+        {
+          "name": "Summary",
+          "display": "AI Summary",
+          "type": "Note",
+          "rich": true,
+          "schemaXml": "<Field Type='Note' Name='Summary' StaticName='Summary' DisplayName='AI Summary' NumLines='10' RichText='TRUE' RichTextMode='FullHtml' />"
+        },
+        {
+          "name": "ProcessingStatus",
+          "display": "Processing Status",
+          "type": "Choice",
+          "choices": [
+            "New",
+            "Waiting for transcript",
+            "Processing",
+            "Done",
+            "Needs review",
+            "Error"
+          ],
+          "default": "New",
+          "schemaXml": "<Field Type='Choice' Name='ProcessingStatus' StaticName='ProcessingStatus' DisplayName='Processing Status' Format='Dropdown'><Default>New</Default><CHOICES><CHOICE>New</CHOICE><CHOICE>Waiting for transcript</CHOICE><CHOICE>Processing</CHOICE><CHOICE>Done</CHOICE><CHOICE>Needs review</CHOICE><CHOICE>Error</CHOICE></CHOICES></Field>"
+        },
+        {
+          "name": "CaptureMode",
+          "display": "Capture Mode",
+          "type": "Choice",
+          "choices": [
+            "Pasted notes",
+            "Teams transcript"
+          ],
+          "default": "Pasted notes",
+          "schemaXml": "<Field Type='Choice' Name='CaptureMode' StaticName='CaptureMode' DisplayName='Capture Mode' Format='Dropdown'><Default>Pasted notes</Default><CHOICES><CHOICE>Pasted notes</CHOICE><CHOICE>Teams transcript</CHOICE></CHOICES></Field>"
+        },
+        {
+          "name": "MeetingStart",
+          "display": "Meeting Start",
+          "type": "DateTime",
+          "schemaXml": "<Field Type='DateTime' Name='MeetingStart' StaticName='MeetingStart' DisplayName='Meeting Start' Format='DateTime' />"
+        },
+        {
+          "name": "MeetingEnd",
+          "display": "Meeting End",
+          "type": "DateTime",
+          "schemaXml": "<Field Type='DateTime' Name='MeetingEnd' StaticName='MeetingEnd' DisplayName='Meeting End' Format='DateTime' />"
+        },
+        {
+          "name": "JoinUrl",
+          "display": "Teams Join Link",
+          "type": "Note",
+          "rich": false,
+          "schemaXml": "<Field Type='Note' Name='JoinUrl' StaticName='JoinUrl' DisplayName='Teams Join Link' NumLines='10' RichText='FALSE' />"
+        },
+        {
+          "name": "OrganizerEmail",
+          "display": "Organizer Email",
+          "type": "Text",
+          "schemaXml": "<Field Type='Text' Name='OrganizerEmail' StaticName='OrganizerEmail' DisplayName='Organizer Email' MaxLength='255' />"
+        },
+        {
+          "name": "SeriesId",
+          "display": "Series Id",
+          "type": "Text",
+          "schemaXml": "<Field Type='Text' Name='SeriesId' StaticName='SeriesId' DisplayName='Series Id' MaxLength='255' />"
+        },
+        {
+          "name": "TranscriptAttempts",
+          "display": "Transcript Attempts",
+          "type": "Number",
+          "schemaXml": "<Field Type='Number' Name='TranscriptAttempts' StaticName='TranscriptAttempts' DisplayName='Transcript Attempts' Decimals='0'><Default>0</Default></Field>"
+        },
+        {
+          "name": "LastChecked",
+          "display": "Transcript Last Checked",
+          "type": "DateTime",
+          "schemaXml": "<Field Type='DateTime' Name='LastChecked' StaticName='LastChecked' DisplayName='Transcript Last Checked' Format='DateTime' />"
+        },
+        {
+          "name": "ChatId",
+          "display": "Teams Meeting Chat Id",
+          "type": "Text",
+          "schemaXml": "<Field Type='Text' Name='ChatId' StaticName='ChatId' DisplayName='Teams Meeting Chat Id' MaxLength='255' />"
+        },
+        {
+          "name": "RecapPosted",
+          "display": "Recap Posted",
+          "type": "Boolean",
+          "schemaXml": "<Field Type='Boolean' Name='RecapPosted' StaticName='RecapPosted' DisplayName='Recap Posted'><Default>0</Default></Field>"
+        },
+        {
+          "name": "AgendaPosted",
+          "display": "Agenda Posted",
+          "type": "Boolean",
+          "schemaXml": "<Field Type='Boolean' Name='AgendaPosted' StaticName='AgendaPosted' DisplayName='Agenda Posted'><Default>0</Default></Field>"
+        },
+        {
+          "name": "TranscriptPurged",
+          "display": "Transcript Purged",
+          "type": "Boolean",
+          "schemaXml": "<Field Type='Boolean' Name='TranscriptPurged' StaticName='TranscriptPurged' DisplayName='Transcript Purged'><Default>0</Default></Field>"
+        },
+        {
+          "name": "NotesPage",
+          "display": "Meeting Notes Page",
+          "type": "URL",
+          "schemaXml": "<Field Type='URL' Name='NotesPage' StaticName='NotesPage' DisplayName='Meeting Notes Page' Format='Hyperlink' />"
+        }
+      ]
+    },
+    {
+      "title": "Action Items",
+      "url": "ActionItems",
+      "fields": [
+        {
+          "name": "Project",
+          "display": "Project",
+          "type": "Lookup",
+          "lookupList": "Projects",
+          "schemaXml": "<Field Type='Lookup' Name='Project' StaticName='Project' DisplayName='Project' List='{ListId:Projects}' ShowField='Title' />"
+        },
+        {
+          "name": "SourceMeeting",
+          "display": "Source Meeting",
+          "type": "Lookup",
+          "lookupList": "Meetings",
+          "schemaXml": "<Field Type='Lookup' Name='SourceMeeting' StaticName='SourceMeeting' DisplayName='Source Meeting' List='{ListId:Meetings}' ShowField='Title' />"
+        },
+        {
+          "name": "Owner",
+          "display": "Owner",
+          "type": "User",
+          "schemaXml": "<Field Type='User' Name='Owner' StaticName='Owner' DisplayName='Owner' UserSelectionMode='PeopleOnly' />"
+        },
+        {
+          "name": "OwnerAsWritten",
+          "display": "Owner (as written in notes)",
+          "type": "Text",
+          "schemaXml": "<Field Type='Text' Name='OwnerAsWritten' StaticName='OwnerAsWritten' DisplayName='Owner (as written in notes)' MaxLength='255' />"
+        },
+        {
+          "name": "OwnerEmail",
+          "display": "Owner Email",
+          "type": "Text",
+          "schemaXml": "<Field Type='Text' Name='OwnerEmail' StaticName='OwnerEmail' DisplayName='Owner Email' MaxLength='255' />"
+        },
+        {
+          "name": "Source",
+          "display": "Source",
+          "type": "Choice",
+          "choices": [
+            "Meeting",
+            "Manual"
+          ],
+          "default": "Manual",
+          "schemaXml": "<Field Type='Choice' Name='Source' StaticName='Source' DisplayName='Source' Format='Dropdown'><Default>Manual</Default><CHOICES><CHOICE>Meeting</CHOICE><CHOICE>Manual</CHOICE></CHOICES></Field>"
+        },
+        {
+          "name": "ClosedDate",
+          "display": "Closed Date",
+          "type": "Date",
+          "schemaXml": "<Field Type='DateTime' Name='ClosedDate' StaticName='ClosedDate' DisplayName='Closed Date' Format='DateOnly' />"
+        },
+        {
+          "name": "ExternalId",
+          "display": "Tracker Item Id",
+          "type": "Text",
+          "schemaXml": "<Field Type='Text' Name='ExternalId' StaticName='ExternalId' DisplayName='Tracker Item Id' MaxLength='255' />"
+        },
+        {
+          "name": "ExternalLink",
+          "display": "Tracker Item",
+          "type": "URL",
+          "schemaXml": "<Field Type='URL' Name='ExternalLink' StaticName='ExternalLink' DisplayName='Tracker Item' Format='Hyperlink' />"
+        },
+        {
+          "name": "SyncState",
+          "display": "Sync State",
+          "type": "Choice",
+          "choices": [
+            "Not synced",
+            "Synced",
+            "Error"
+          ],
+          "default": "Not synced",
+          "schemaXml": "<Field Type='Choice' Name='SyncState' StaticName='SyncState' DisplayName='Sync State' Format='Dropdown'><Default>Not synced</Default><CHOICES><CHOICE>Not synced</CHOICE><CHOICE>Synced</CHOICE><CHOICE>Error</CHOICE></CHOICES></Field>"
+        },
+        {
+          "name": "SeenInMeetings",
+          "display": "Seen in Meetings",
+          "type": "Number",
+          "schemaXml": "<Field Type='Number' Name='SeenInMeetings' StaticName='SeenInMeetings' DisplayName='Seen in Meetings' Decimals='0'><Default>0</Default></Field>"
+        },
+        {
+          "name": "DueDate",
+          "display": "Due Date",
+          "type": "Date",
+          "schemaXml": "<Field Type='DateTime' Name='DueDate' StaticName='DueDate' DisplayName='Due Date' Format='DateOnly' />"
+        },
+        {
+          "name": "ItemStatus",
+          "display": "Status",
+          "type": "Choice",
+          "choices": [
+            "Not started",
+            "In progress",
+            "Blocked",
+            "Done"
+          ],
+          "default": "Not started",
+          "schemaXml": "<Field Type='Choice' Name='ItemStatus' StaticName='ItemStatus' DisplayName='Status' Format='Dropdown'><Default>Not started</Default><CHOICES><CHOICE>Not started</CHOICE><CHOICE>In progress</CHOICE><CHOICE>Blocked</CHOICE><CHOICE>Done</CHOICE></CHOICES></Field>"
+        },
+        {
+          "name": "Priority",
+          "display": "Priority",
+          "type": "Choice",
+          "choices": [
+            "High",
+            "Medium",
+            "Low"
+          ],
+          "default": "Medium",
+          "schemaXml": "<Field Type='Choice' Name='Priority' StaticName='Priority' DisplayName='Priority' Format='Dropdown'><Default>Medium</Default><CHOICES><CHOICE>High</CHOICE><CHOICE>Medium</CHOICE><CHOICE>Low</CHOICE></CHOICES></Field>"
+        },
+        {
+          "name": "NotifyVia",
+          "display": "Notify Via",
+          "type": "Choice",
+          "choices": [
+            "Project default",
+            "Teams",
+            "Outlook",
+            "Teams and Outlook"
+          ],
+          "default": "Project default",
+          "schemaXml": "<Field Type='Choice' Name='NotifyVia' StaticName='NotifyVia' DisplayName='Notify Via' Format='Dropdown'><Default>Project default</Default><CHOICES><CHOICE>Project default</CHOICE><CHOICE>Teams</CHOICE><CHOICE>Outlook</CHOICE><CHOICE>Teams and Outlook</CHOICE></CHOICES></Field>"
+        },
+        {
+          "name": "Notified",
+          "display": "Notified",
+          "type": "Boolean",
+          "schemaXml": "<Field Type='Boolean' Name='Notified' StaticName='Notified' DisplayName='Notified'><Default>0</Default></Field>"
+        },
+        {
+          "name": "Details",
+          "display": "Details",
+          "type": "Note",
+          "rich": false,
+          "schemaXml": "<Field Type='Note' Name='Details' StaticName='Details' DisplayName='Details' NumLines='10' RichText='FALSE' />"
+        }
+      ]
+    },
+    {
+      "title": "Risks",
+      "url": "Risks",
+      "fields": [
+        {
+          "name": "Project",
+          "display": "Project",
+          "type": "Lookup",
+          "lookupList": "Projects",
+          "schemaXml": "<Field Type='Lookup' Name='Project' StaticName='Project' DisplayName='Project' List='{ListId:Projects}' ShowField='Title' />"
+        },
+        {
+          "name": "SourceMeeting",
+          "display": "Source Meeting",
+          "type": "Lookup",
+          "lookupList": "Meetings",
+          "schemaXml": "<Field Type='Lookup' Name='SourceMeeting' StaticName='SourceMeeting' DisplayName='Source Meeting' List='{ListId:Meetings}' ShowField='Title' />"
+        },
+        {
+          "name": "Impact",
+          "display": "Impact",
+          "type": "Choice",
+          "choices": [
+            "High",
+            "Medium",
+            "Low"
+          ],
+          "default": "Medium",
+          "schemaXml": "<Field Type='Choice' Name='Impact' StaticName='Impact' DisplayName='Impact' Format='Dropdown'><Default>Medium</Default><CHOICES><CHOICE>High</CHOICE><CHOICE>Medium</CHOICE><CHOICE>Low</CHOICE></CHOICES></Field>"
+        },
+        {
+          "name": "Likelihood",
+          "display": "Likelihood",
+          "type": "Choice",
+          "choices": [
+            "High",
+            "Medium",
+            "Low"
+          ],
+          "default": "Medium",
+          "schemaXml": "<Field Type='Choice' Name='Likelihood' StaticName='Likelihood' DisplayName='Likelihood' Format='Dropdown'><Default>Medium</Default><CHOICES><CHOICE>High</CHOICE><CHOICE>Medium</CHOICE><CHOICE>Low</CHOICE></CHOICES></Field>"
+        },
+        {
+          "name": "Mitigation",
+          "display": "Mitigation",
+          "type": "Note",
+          "rich": false,
+          "schemaXml": "<Field Type='Note' Name='Mitigation' StaticName='Mitigation' DisplayName='Mitigation' NumLines='10' RichText='FALSE' />"
+        },
+        {
+          "name": "Owner",
+          "display": "Owner",
+          "type": "User",
+          "schemaXml": "<Field Type='User' Name='Owner' StaticName='Owner' DisplayName='Owner' UserSelectionMode='PeopleOnly' />"
+        },
+        {
+          "name": "RiskStatus",
+          "display": "Status",
+          "type": "Choice",
+          "choices": [
+            "Open",
+            "Mitigating",
+            "Closed"
+          ],
+          "default": "Open",
+          "schemaXml": "<Field Type='Choice' Name='RiskStatus' StaticName='RiskStatus' DisplayName='Status' Format='Dropdown'><Default>Open</Default><CHOICES><CHOICE>Open</CHOICE><CHOICE>Mitigating</CHOICE><CHOICE>Closed</CHOICE></CHOICES></Field>"
+        }
+      ]
+    },
+    {
+      "title": "Decisions",
+      "url": "Decisions",
+      "fields": [
+        {
+          "name": "Project",
+          "display": "Project",
+          "type": "Lookup",
+          "lookupList": "Projects",
+          "schemaXml": "<Field Type='Lookup' Name='Project' StaticName='Project' DisplayName='Project' List='{ListId:Projects}' ShowField='Title' />"
+        },
+        {
+          "name": "SourceMeeting",
+          "display": "Source Meeting",
+          "type": "Lookup",
+          "lookupList": "Meetings",
+          "schemaXml": "<Field Type='Lookup' Name='SourceMeeting' StaticName='SourceMeeting' DisplayName='Source Meeting' List='{ListId:Meetings}' ShowField='Title' />"
+        },
+        {
+          "name": "DecisionDate",
+          "display": "Decision Date",
+          "type": "Date",
+          "schemaXml": "<Field Type='DateTime' Name='DecisionDate' StaticName='DecisionDate' DisplayName='Decision Date' Format='DateOnly' />"
+        },
+        {
+          "name": "DecidedBy",
+          "display": "Decided By",
+          "type": "Text",
+          "schemaXml": "<Field Type='Text' Name='DecidedBy' StaticName='DecidedBy' DisplayName='Decided By' MaxLength='255' />"
+        },
+        {
+          "name": "Rationale",
+          "display": "Rationale",
+          "type": "Note",
+          "rich": false,
+          "schemaXml": "<Field Type='Note' Name='Rationale' StaticName='Rationale' DisplayName='Rationale' NumLines='10' RichText='FALSE' />"
+        }
+      ]
+    },
+    {
+      "title": "Status Updates",
+      "url": "StatusUpdates",
+      "fields": [
+        {
+          "name": "Project",
+          "display": "Project",
+          "type": "Lookup",
+          "lookupList": "Projects",
+          "schemaXml": "<Field Type='Lookup' Name='Project' StaticName='Project' DisplayName='Project' List='{ListId:Projects}' ShowField='Title' />"
+        },
+        {
+          "name": "WeekOf",
+          "display": "Week Of",
+          "type": "Date",
+          "schemaXml": "<Field Type='DateTime' Name='WeekOf' StaticName='WeekOf' DisplayName='Week Of' Format='DateOnly' />"
+        },
+        {
+          "name": "OverallStatus",
+          "display": "Overall Status",
+          "type": "Choice",
+          "choices": [
+            "On track",
+            "At risk",
+            "Off track"
+          ],
+          "default": "On track",
+          "schemaXml": "<Field Type='Choice' Name='OverallStatus' StaticName='OverallStatus' DisplayName='Overall Status' Format='Dropdown'><Default>On track</Default><CHOICES><CHOICE>On track</CHOICE><CHOICE>At risk</CHOICE><CHOICE>Off track</CHOICE></CHOICES></Field>"
+        },
+        {
+          "name": "DraftPage",
+          "display": "Draft Page",
+          "type": "URL",
+          "schemaXml": "<Field Type='URL' Name='DraftPage' StaticName='DraftPage' DisplayName='Draft Page' Format='Hyperlink' />"
+        },
+        {
+          "name": "ApprovalStatus",
+          "display": "Approval Status",
+          "type": "Choice",
+          "choices": [
+            "Pending",
+            "Approved",
+            "Rejected",
+            "Published"
+          ],
+          "default": "Pending",
+          "schemaXml": "<Field Type='Choice' Name='ApprovalStatus' StaticName='ApprovalStatus' DisplayName='Approval Status' Format='Dropdown'><Default>Pending</Default><CHOICES><CHOICE>Pending</CHOICE><CHOICE>Approved</CHOICE><CHOICE>Rejected</CHOICE><CHOICE>Published</CHOICE></CHOICES></Field>"
+        },
+        {
+          "name": "ReviewerComments",
+          "display": "Reviewer Comments",
+          "type": "Note",
+          "rich": false,
+          "schemaXml": "<Field Type='Note' Name='ReviewerComments' StaticName='ReviewerComments' DisplayName='Reviewer Comments' NumLines='10' RichText='FALSE' />"
+        },
+        {
+          "name": "PublishedPage",
+          "display": "Published News Post",
+          "type": "URL",
+          "schemaXml": "<Field Type='URL' Name='PublishedPage' StaticName='PublishedPage' DisplayName='Published News Post' Format='Hyperlink' />"
+        }
+      ]
+    },
+    {
+      "title": "Milestones",
+      "url": "Milestones",
+      "fields": [
+        {
+          "name": "Project",
+          "display": "Project",
+          "type": "Lookup",
+          "lookupList": "Projects",
+          "schemaXml": "<Field Type='Lookup' Name='Project' StaticName='Project' DisplayName='Project' List='{ListId:Projects}' ShowField='Title' />"
+        },
+        {
+          "name": "Workstream",
+          "display": "Workstream",
+          "type": "Text",
+          "schemaXml": "<Field Type='Text' Name='Workstream' StaticName='Workstream' DisplayName='Workstream' MaxLength='255' />"
+        },
+        {
+          "name": "StartDate",
+          "display": "Start Date",
+          "type": "Date",
+          "schemaXml": "<Field Type='DateTime' Name='StartDate' StaticName='StartDate' DisplayName='Start Date' Format='DateOnly' />"
+        },
+        {
+          "name": "DueDate",
+          "display": "Due Date",
+          "type": "Date",
+          "schemaXml": "<Field Type='DateTime' Name='DueDate' StaticName='DueDate' DisplayName='Due Date' Format='DateOnly' />"
+        },
+        {
+          "name": "MilestoneStatus",
+          "display": "Status",
+          "type": "Choice",
+          "choices": [
+            "Not started",
+            "In progress",
+            "Blocked",
+            "Done"
+          ],
+          "default": "Not started",
+          "schemaXml": "<Field Type='Choice' Name='MilestoneStatus' StaticName='MilestoneStatus' DisplayName='Status' Format='Dropdown'><Default>Not started</Default><CHOICES><CHOICE>Not started</CHOICE><CHOICE>In progress</CHOICE><CHOICE>Blocked</CHOICE><CHOICE>Done</CHOICE></CHOICES></Field>"
+        },
+        {
+          "name": "OwnerEmail",
+          "display": "Owner Email",
+          "type": "Text",
+          "schemaXml": "<Field Type='Text' Name='OwnerEmail' StaticName='OwnerEmail' DisplayName='Owner Email' MaxLength='255' />"
+        },
+        {
+          "name": "IsGate",
+          "display": "Gate",
+          "type": "Boolean",
+          "schemaXml": "<Field Type='Boolean' Name='IsGate' StaticName='IsGate' DisplayName='Gate'><Default>0</Default></Field>"
+        },
+        {
+          "name": "DependsOn",
+          "display": "Depends On",
+          "type": "LookupMulti",
+          "lookupList": "Milestones",
+          "schemaXml": "<Field Type='LookupMulti' Mult='TRUE' Name='DependsOn' StaticName='DependsOn' DisplayName='Depends On' List='{ListId:Milestones}' ShowField='Title' />"
+        },
+        {
+          "name": "SlipNotified",
+          "display": "Slip Notified",
+          "type": "Boolean",
+          "schemaXml": "<Field Type='Boolean' Name='SlipNotified' StaticName='SlipNotified' DisplayName='Slip Notified'><Default>0</Default></Field>"
+        }
+      ]
+    },
+    {
+      "title": "Stakeholders",
+      "url": "Stakeholders",
+      "fields": [
+        {
+          "name": "Project",
+          "display": "Project",
+          "type": "Lookup",
+          "lookupList": "Projects",
+          "schemaXml": "<Field Type='Lookup' Name='Project' StaticName='Project' DisplayName='Project' List='{ListId:Projects}' ShowField='Title' />"
+        },
+        {
+          "name": "Email",
+          "display": "Email",
+          "type": "Text",
+          "schemaXml": "<Field Type='Text' Name='Email' StaticName='Email' DisplayName='Email' MaxLength='255' />"
+        },
+        {
+          "name": "Role",
+          "display": "Role",
+          "type": "Text",
+          "schemaXml": "<Field Type='Text' Name='Role' StaticName='Role' DisplayName='Role' MaxLength='255' />"
+        },
+        {
+          "name": "RACI",
+          "display": "RACI",
+          "type": "Choice",
+          "choices": [
+            "Responsible",
+            "Accountable",
+            "Consulted",
+            "Informed"
+          ],
+          "default": "Informed",
+          "schemaXml": "<Field Type='Choice' Name='RACI' StaticName='RACI' DisplayName='RACI' Format='Dropdown'><Default>Informed</Default><CHOICES><CHOICE>Responsible</CHOICE><CHOICE>Accountable</CHOICE><CHOICE>Consulted</CHOICE><CHOICE>Informed</CHOICE></CHOICES></Field>"
+        },
+        {
+          "name": "Influence",
+          "display": "Influence",
+          "type": "Choice",
+          "choices": [
+            "High",
+            "Medium",
+            "Low"
+          ],
+          "default": "Medium",
+          "schemaXml": "<Field Type='Choice' Name='Influence' StaticName='Influence' DisplayName='Influence' Format='Dropdown'><Default>Medium</Default><CHOICES><CHOICE>High</CHOICE><CHOICE>Medium</CHOICE><CHOICE>Low</CHOICE></CHOICES></Field>"
+        }
+      ]
+    },
+    {
+      "title": "Kickoffs",
+      "url": "Kickoffs",
+      "fields": [
+        {
+          "name": "Project",
+          "display": "Project",
+          "type": "Lookup",
+          "lookupList": "Projects",
+          "schemaXml": "<Field Type='Lookup' Name='Project' StaticName='Project' DisplayName='Project' List='{ListId:Projects}' ShowField='Title' />"
+        },
+        {
+          "name": "Goal",
+          "display": "Goal",
+          "type": "Note",
+          "rich": false,
+          "schemaXml": "<Field Type='Note' Name='Goal' StaticName='Goal' DisplayName='Goal' NumLines='10' RichText='FALSE' />"
+        },
+        {
+          "name": "Scope",
+          "display": "In Scope",
+          "type": "Note",
+          "rich": false,
+          "schemaXml": "<Field Type='Note' Name='Scope' StaticName='Scope' DisplayName='In Scope' NumLines='10' RichText='FALSE' />"
+        },
+        {
+          "name": "OutOfScope",
+          "display": "Out of Scope",
+          "type": "Note",
+          "rich": false,
+          "schemaXml": "<Field Type='Note' Name='OutOfScope' StaticName='OutOfScope' DisplayName='Out of Scope' NumLines='10' RichText='FALSE' />"
+        },
+        {
+          "name": "SuccessMetrics",
+          "display": "Success Metrics",
+          "type": "Note",
+          "rich": false,
+          "schemaXml": "<Field Type='Note' Name='SuccessMetrics' StaticName='SuccessMetrics' DisplayName='Success Metrics' NumLines='10' RichText='FALSE' />"
+        },
+        {
+          "name": "Constraints",
+          "display": "Constraints and Assumptions",
+          "type": "Note",
+          "rich": false,
+          "schemaXml": "<Field Type='Note' Name='Constraints' StaticName='Constraints' DisplayName='Constraints and Assumptions' NumLines='10' RichText='FALSE' />"
+        },
+        {
+          "name": "KickoffStatus",
+          "display": "Status",
+          "type": "Choice",
+          "choices": [
+            "Draft requested",
+            "Generating",
+            "Ready",
+            "Error"
+          ],
+          "default": "Draft requested",
+          "schemaXml": "<Field Type='Choice' Name='KickoffStatus' StaticName='KickoffStatus' DisplayName='Status' Format='Dropdown'><Default>Draft requested</Default><CHOICES><CHOICE>Draft requested</CHOICE><CHOICE>Generating</CHOICE><CHOICE>Ready</CHOICE><CHOICE>Error</CHOICE></CHOICES></Field>"
+        },
+        {
+          "name": "CharterPage",
+          "display": "Charter Page",
+          "type": "URL",
+          "schemaXml": "<Field Type='URL' Name='CharterPage' StaticName='CharterPage' DisplayName='Charter Page' Format='Hyperlink' />"
+        }
+      ]
+    }
+  ]
+}

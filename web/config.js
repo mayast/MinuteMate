@@ -1,16 +1,18 @@
-// MinuteMate website settings. Fill these in after you register the app (see docs/setup-website.md).
-// Nothing here is secret: a single-page app has no client secret, so this file is safe to publish.
+// MinuteMate website settings. Nothing here is secret: a single-page app has no client secret.
 window.MINUTEMATE_CONFIG = {
-  // Entra ID app registration → Overview → Application (client) ID
+  // The website's app registration (Entra ID → App registrations → Application (client) ID).
+  // Tip: register it once as "multitenant" and other organizations only need an admin to consent;
+  // nobody else has to register anything. See docs/setup-website.md.
   clientId: "",
-  // Entra ID → Overview → Directory (tenant) ID, or your domain, e.g. "contoso.onmicrosoft.com"
-  tenantId: "",
-  // The SharePoint site that holds the MinuteMate lists
-  siteHostname: "contoso.sharepoint.com",
-  sitePath: "/sites/ProjectHub",
+  // Leave as "organizations" for a multitenant registration, or set your tenant ID or domain.
+  tenantId: "organizations",
+  // Optional. Leave empty and each person enters their SharePoint site once on the Setup screen
+  // (their browser remembers it). Set it to skip that step for everyone, e.g.
+  // "https://contoso.sharepoint.com/sites/ProjectHub".
+  siteUrl: "",
   // How far ahead to look for Teams meetings in the meeting picker
   meetingLookaheadDays: 14,
-  // Optional: mailbox people can add to invites so meetings are captured automatically (Flow 5), e.g. "minutemate@contoso.com"
+  // Optional: mailbox people can add to invites so meetings are captured automatically (Flow 5)
   inviteAddress: "",
   // Impact tab: estimated minutes of note-taking and follow-up saved per processed meeting
   minutesSavedPerMeeting: 30
