@@ -1,6 +1,10 @@
 // Meetings (Phase 3): choose Teams meetings to capture, auto-capture by keyword or whole series,
 // and watch the transcript pickup queue (waiting, processing, done, error → retry).
-import { esc, pill, fmtDay, fmtTime, toast, busy } from "../ui.js";
+import { esc, pill, fmtDay, fmtShort, fmtTime, toast, busy, isPast } from "../ui.js";
+import { applyFilter } from "./tracker.js";
+
+let openId = null; // meeting expanded in the transcript queue
+const htmlToText = (html) => { try { return new DOMParser().parseFromString(String(html || ""), "text/html").body.textContent.trim(); } catch { return String(html || ""); } };
 import { buildAgenda } from "../agenda.js";
 
 // Privacy opt-out: meetings with [no-capture] in the title are never captured (Phase 5.7).
@@ -16,6 +20,7 @@ export function render(ctx, el) {
   const byUrl = new Map(all.map((m) => [m.JoinUrl, m]));
   const kw = keywordsOf(p);
   const suggestions = ctx.state.calendar.filter((e) => !byUrl.has(e.joinUrl) && !optedOut(e) && kw.some((k) => e.title.toLowerCase().includes(k)));
+  if (ctx.state.openMeetingId) { openId = ctx.state.openMeetingId; ctx.state.openMeetingId = null; }
   const queue = ctx.items("meetings").filter((m) => m.CaptureMode === "Teams transcript" || m.ProcessingStatus !== "Done")
     .sort((a, b) => (b.MeetingStart || "").localeCompare(a.MeetingStart || ""));
   const invite = ctx.cfg.inviteAddress;
@@ -54,7 +59,7 @@ export function render(ctx, el) {
 
     <h3 class="section-title">Transcript queue</h3>
     <ul class="rows">
-      ${queue.length ? queue.map(queueRow).join("") : `<li class="empty">Captured meetings appear here with their transcript status.</li>`}
+      ${queue.length ? queue.map((m) => queueRow(ctx, m)).join("") : `<li class="empty">Captured meetings appear here with their transcript status.</li>`}
     </ul>`;
 
   bind(ctx, el, suggestions);
@@ -82,14 +87,48 @@ function meetingRow(ctx, e, item) {
   </li>`;
 }
 
-function queueRow(m) {
+function queueRow(ctx, m) {
   const tries = Number(m.TranscriptAttempts || 0);
   const sub = [fmtDay(m.MeetingStart), m.ProcessingStatus === "Waiting for transcript" && tries ? `checked ${tries}×` : "",
     m.ProcessingStatus === "Error" ? "no transcript found" : ""].filter(Boolean).join(" · ");
-  const actions = m.ProcessingStatus === "Error"
-    ? `<button class="btn ghost small" data-act="retry" data-id="${esc(m.id)}">Retry</button>`
-    : m.NotesPage?.Url ? `<a class="btn ghost small" href="${esc(m.NotesPage.Url)}" target="_blank" rel="noopener">Notes</a>` : "";
-  return `<li><span>${esc(m.Title)}<br><span class="sub">${esc(sub)}</span></span><span class="row-end">${pill(m.ProcessingStatus)} ${actions}</span></li>`;
+  const actions = m.ProcessingStatus === "Error" ? `<button class="btn ghost small" data-act="retry" data-id="${esc(m.id)}">Retry</button>` : "";
+  const open = openId === m.id;
+  return `<li class="queue-item${open ? " open" : ""}" data-meeting="${esc(m.id)}">
+    <div class="queue-row">
+      <button class="row-title" data-act="details" data-id="${esc(m.id)}" aria-expanded="${open}">
+        <span class="chev" aria-hidden="true">▸</span>
+        <span>${esc(m.Title)}<br><span class="sub">${esc(sub)}</span></span>
+      </button>
+      <span class="row-end">${pill(m.ProcessingStatus)} ${actions}</span>
+    </div>
+    ${open ? `<div class="meeting-detail">${meetingDetail(ctx, m)}</div>` : ""}
+  </li>`;
+}
+
+// What a meeting produced: summary, action items, decisions, risks, and where to go next.
+function meetingDetail(ctx, m) {
+  const from = (key) => (ctx.state.lists[key] || []).filter((x) => String(x.SourceMeetingLookupId || "") === m.id);
+  const actions = from("actions"), decisions = from("decisions"), risks = from("risks");
+  const summary = htmlToText(m.Summary);
+  const waiting = { "Waiting for transcript": "MinuteMate will read the transcript after the meeting ends.", Processing: "MinuteMate is reading the transcript now.",
+    Error: "No transcript was found. Check that transcription was on, then select Retry, or paste notes into the meeting in SharePoint.", New: "Notes are queued for processing." }[m.ProcessingStatus];
+  const list = (arr, fn, empty) => arr.length ? `<ul>${arr.map(fn).join("")}</ul>` : `<p class="muted small">${empty}</p>`;
+  const notes = m.NotesPage?.Url
+    ? (ctx.demo ? `<button class="btn ghost small" data-act="demo-notes">Open meeting notes</button>`
+                : `<a class="btn ghost small" href="${esc(m.NotesPage.Url)}" target="_blank" rel="noopener">Open meeting notes ↗</a>`)
+    : "";
+  const total = actions.length + decisions.length + risks.length;
+  return `
+    <p class="detail-summary">${summary ? esc(summary) : `<span class="muted">${esc(waiting || "No summary yet.")}</span>`}</p>
+    ${total || summary ? `<div class="detail-cols">
+      <div><p class="agenda-h">Action items (${actions.length})</p>${list(actions, (a) => `<li>${esc(a.Title)} <span class="sub">— ${esc(a.OwnerAsWritten || a.OwnerEmail || "no owner")}${a.DueDate ? `, due ${esc(fmtShort(a.DueDate))}` : ""}</span> ${a.ItemStatus === "Done" ? pill("Done") : isPast(a.DueDate) ? pill("Overdue") : ""}</li>`, "None")}</div>
+      <div><p class="agenda-h">Decisions (${decisions.length})</p>${list(decisions, (d) => `<li>${esc(d.Title)}</li>`, "None")}
+        <p class="agenda-h">Risks (${risks.length})</p>${list(risks, (r) => `<li>${esc(r.Title)} ${r.Impact ? pill(r.Impact) : ""}</li>`, "None")}</div>
+    </div>` : ""}
+    <div class="detail-actions">
+      ${notes}
+      ${total ? `<button class="btn ghost small" data-act="to-tracker" data-id="${esc(m.id)}">See these items in the Tracker</button>` : ""}
+    </div>`;
 }
 
 async function capture(ctx, e) {
@@ -146,6 +185,19 @@ function bind(ctx, el, suggestions) {
       catch { toast("Couldn't copy. Select the text and copy it instead."); }
     });
   }));
+
+  el.querySelectorAll('[data-act="details"]').forEach((b) => b.addEventListener("click", () => {
+    openId = openId === b.dataset.id ? null : b.dataset.id;
+    ctx.render();
+    el.querySelector(`[data-meeting="${CSS.escape(b.dataset.id)}"] .row-title`)?.focus();
+  }));
+  el.querySelector('[data-act="to-tracker"]')?.addEventListener("click", (e) => {
+    applyFilter({ meetingId: e.target.dataset.id, status: "all" });
+    ctx.selectTab("tracker");
+  });
+  el.querySelector('[data-act="demo-notes"]')?.addEventListener("click", () => toast("In your workspace this opens the meeting notes page in SharePoint."));
+  const opened = el.querySelector(".queue-item.open");
+  if (opened && ctx.state.scrollToMeeting) { ctx.state.scrollToMeeting = false; opened.scrollIntoView({ block: "center" }); }
 
   el.querySelectorAll('[data-act="retry"]').forEach((b) => b.addEventListener("click", () =>
     busy(b, async () => {

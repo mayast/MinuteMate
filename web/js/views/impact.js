@@ -2,6 +2,7 @@
 // Headline tiles, one single-series bar chart (action items closed per week) with hover tooltips,
 // and a by-owner table that doubles as the chart's table view.
 import { esc, DAY, fmtShort } from "../ui.js";
+import { applyFilter } from "./tracker.js";
 
 let scope = "project"; // "project" | "all"
 const WEEKS = 8;
@@ -82,13 +83,28 @@ export function render(ctx, el) {
     <div class="table-wrap">
       <table class="grid">
         <thead><tr><th>Owner</th><th class="num">Open</th><th class="num">Overdue</th><th class="num">Closed</th><th class="num">On time</th></tr></thead>
-        <tbody>${m.owners.length ? m.owners.map((o) => `<tr><td>${esc(o.name)}</td><td class="num">${o.open}</td><td class="num ${o.overdue ? "bad-text" : ""}">${o.overdue}</td><td class="num">${o.closed}</td><td class="num">${o.withDue ? pct(o.onTime / o.withDue) : "—"}</td></tr>`).join("")
+        <tbody>${m.owners.length ? m.owners.map((o) => {
+          // In "This project" scope, names and counts open the Tracker filtered to those items.
+          const link = (n, view, label) => scope === "project" && n ? `<button class="cell-link" data-owner="${esc(o.name)}" data-view="${view}" aria-label="${esc(label)}">${n}</button>` : String(n);
+          return `<tr>
+            <td>${scope === "project" ? `<button class="cell-link name" data-owner="${esc(o.name)}" data-view="all">${esc(o.name)}</button>` : esc(o.name)}</td>
+            <td class="num">${link(o.open, "open", `${o.open} open items for ${o.name}`)}</td>
+            <td class="num ${o.overdue ? "bad-text" : ""}">${link(o.overdue, "overdue", `${o.overdue} overdue items for ${o.name}`)}</td>
+            <td class="num">${link(o.closed, "closed", `${o.closed} closed items for ${o.name}`)}</td>
+            <td class="num">${o.withDue ? pct(o.onTime / o.withDue) : "—"}</td></tr>`;
+        }).join("")
           : `<tr><td colspan="5" class="empty">No action items yet.</td></tr>`}</tbody>
       </table>
     </div>
+    ${scope === "project" ? `<p class="muted small">Select a name or number to see those action items.</p>` : ""}
     <p class="muted small">Hours saved assumes ${m.minutes} minutes of note-taking and follow-up per captured meeting (set <code>minutesSavedPerMeeting</code> in config.js). On time means closed on or before the due date.</p>`;
 
   el.querySelectorAll("[data-scope]").forEach((b) => b.addEventListener("click", () => { scope = b.dataset.scope; ctx.render(); }));
+  el.querySelectorAll(".cell-link").forEach((b) => b.addEventListener("click", () => {
+    const view = b.dataset.view;
+    applyFilter({ owner: b.dataset.owner, status: view === "closed" ? "Done" : view === "all" ? "all" : "open", lateOnly: view === "overdue" });
+    ctx.selectTab("tracker");
+  }));
   drawChart(el.querySelector("#closedChart"), m.weeks);
 }
 

@@ -69,19 +69,31 @@ const TYPES = {
   }
 };
 
-const ui = { type: "actions", q: "", status: "open", lateOnly: false };
+const ui = { type: "actions", q: "", status: "open", lateOnly: false, owner: null, meetingId: null };
+const ownerOf = (x) => x.OwnerAsWritten || x.OwnerEmail || "No owner";
+
+// Other tabs open the Tracker with a filter, e.g. one owner's overdue items or one meeting's items.
+export function applyFilter(f) {
+  Object.assign(ui, { type: "actions", q: "", status: "open", lateOnly: false, owner: null, meetingId: null }, f);
+}
 
 export function render(ctx, el) {
   if (!ctx.project()) { el.innerHTML = `<p class="empty">Kick off or create a project first.</p>`; return; }
   const T = TYPES[ui.type];
   const all = ctx.items(ui.type);
   const rows = filtered(all, T);
+  const meeting = ui.meetingId ? (ctx.state.lists.meetings || []).find((m) => m.id === ui.meetingId) : null;
+  const chips = [
+    ui.owner && ui.type === "actions" ? `Owner: <strong>${esc(ui.owner)}</strong>` : "",
+    meeting && ui.type !== "milestones" ? `From meeting: <strong>${esc(meeting.Title)}</strong> (${esc(fmtShort(meeting.MeetingStart))})` : ""
+  ].filter(Boolean);
 
   el.innerHTML = `
     <div class="segmented" role="tablist" aria-label="Tracker type">
       ${Object.entries(TYPES).map(([k, t]) => `<button data-type="${k}" aria-selected="${k === ui.type}">${t.label} <span class="count">${ctx.items(k).filter((x) => !t.doneValues.includes(x[t.statusField])).length}</span></button>`).join("")}
     </div>
 
+    ${chips.length ? `<div class="filter-chips"><span>Showing ${chips.join(" · ")}</span><button class="btn ghost small" data-act="clear-filter">Show all</button></div>` : ""}
     <form class="add-row" data-form="add">${T.form}<button class="btn primary small" type="submit">Add</button></form>
 
     <div class="filters">
@@ -115,6 +127,8 @@ function filtered(all, T) {
     .filter((x) => !q || Object.values(x).some((v) => typeof v === "string" && v.toLowerCase().includes(q)))
     .filter((x) => !T.statusField || ui.status === "all" || (ui.status === "open" ? !T.doneValues.includes(x[T.statusField]) : x[T.statusField] === ui.status))
     .filter((x) => !ui.lateOnly || (T.dueField && isPast(x[T.dueField]) && !T.doneValues.includes(x[T.statusField])))
+    .filter((x) => !ui.owner || ui.type !== "actions" || ownerOf(x) === ui.owner)
+    .filter((x) => !ui.meetingId || ui.type === "milestones" || String(x.SourceMeetingLookupId || "") === ui.meetingId)
     .sort((a, b) => (a[T.dueField || "DecisionDate"] || "9").localeCompare(b[T.dueField || "DecisionDate"] || "9"));
 }
 
@@ -137,7 +151,8 @@ function rowHtml(x, T) {
 
 function bind(ctx, el, T, rows) {
   const rerender = () => ctx.render();
-  el.querySelectorAll("[data-type]").forEach((b) => b.addEventListener("click", () => { ui.type = b.dataset.type; ui.status = "open"; ui.lateOnly = false; rerender(); }));
+  el.querySelectorAll("[data-type]").forEach((b) => b.addEventListener("click", () => { ui.type = b.dataset.type; ui.status = ui.meetingId ? "all" : "open"; ui.lateOnly = false; rerender(); }));
+  el.querySelector('[data-act="clear-filter"]')?.addEventListener("click", () => { ui.owner = null; ui.meetingId = null; ui.status = "open"; ui.lateOnly = false; rerender(); });
 
   const q = el.querySelector('[data-f="q"]');
   q.addEventListener("input", () => { ui.q = q.value; clearTimeout(q._t); q._t = setTimeout(() => { rerender(); const n = el.querySelector('[data-f="q"]'); n.focus(); n.setSelectionRange(n.value.length, n.value.length); }, 250); });

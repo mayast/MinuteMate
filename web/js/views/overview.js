@@ -42,13 +42,18 @@ export function render(ctx, el) {
       </div>
       <div>
         <h3>Recent meetings</h3>
-        <ul class="rows">${rows(meetings, (m) => `<li><span>${esc(m.Title)}<br><span class="sub">${esc(fmtDay(m.MeetingStart))} ${link(m.NotesPage, "· notes")}</span></span>${pill(m.ProcessingStatus)}</li>`, "No meetings captured yet.")}</ul>
+        <ul class="rows">${rows(meetings, (m) => `<li><button class="row-title plain" data-meeting="${esc(m.id)}"><span>${esc(m.Title)}<br><span class="sub">${esc(fmtDay(m.MeetingStart))}</span></span></button>${pill(m.ProcessingStatus)}</li>`, "No meetings captured yet.")}</ul>
       </div>
       <div class="span2">
         <h3>Status updates</h3>
         <ul class="rows">${rows(updates, (s) => `<li><span>${esc(s.Title)}<br><span class="sub">${pill(s.OverallStatus)} ${link(s.PublishedPage || s.DraftPage, "· open page")}</span></span>${pill(s.ApprovalStatus)}</li>`, "The first weekly draft arrives on Friday.")}</ul>
       </div>
     </div>`;
+  el.querySelectorAll("[data-meeting]").forEach((b) => b.addEventListener("click", () => {
+    ctx.state.openMeetingId = b.dataset.meeting;
+    ctx.state.scrollToMeeting = true;
+    ctx.selectTab("meetings");
+  }));
 }
 
 function emptyState() {
