@@ -11,7 +11,8 @@ import * as impact from "./views/impact.js";
 import * as kickoff from "./views/kickoff.js";
 
 const CFG = window.MINUTEMATE_CONFIG || {};
-const DEMO = new URLSearchParams(location.search).has("demo");
+// demoOnly: a hosted showcase copy with no Microsoft 365 connection (sample data only).
+const DEMO = new URLSearchParams(location.search).has("demo") || CFG.demoOnly === true;
 const VIEWS = { overview, meetings, tracker, timeline, impact, settings, kickoff };
 
 const ctx = {
@@ -92,7 +93,7 @@ async function boot() {
         return;
       }
     } else {
-      banner(`Demo mode: sample data only, nothing is saved. <a href="${esc(location.pathname)}">Exit demo</a>`);
+      banner(CFG.demoOnly ? "Demo with sample data. Nothing you change here is saved." : `Demo mode: sample data only, nothing is saved. <a href="${esc(location.pathname)}">Exit demo</a>`);
     }
     await ctx.data.init();
     ctx.state.me = await ctx.data.me();
@@ -100,7 +101,7 @@ async function boot() {
     $("#signoutBtn")?.addEventListener("click", signOut);
     await Promise.all([ctx.reload(), ctx.loadCalendar()]);
     $("#app").hidden = false;
-    const startTab = new URLSearchParams(location.search).get("tab");
+    const startTab = new URLSearchParams(location.search).get("tab") || location.hash.replace("#", "");
     ctx.selectTab(VIEWS[startTab] ? startTab : (ctx.state.lists.projects.length ? "overview" : "kickoff"));
   } catch (err) {
     $("#signin").hidden = false;

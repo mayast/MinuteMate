@@ -168,7 +168,7 @@ function bind(ctx, el, T, rows) {
 
   el.querySelectorAll('[data-act="delete"]').forEach((b) => b.addEventListener("click", () => {
     const tr = b.closest("tr");
-    if (!confirm(`Delete "${tr.querySelector(".t-title").firstChild.textContent.trim()}"?`)) return;
+    if (!ctx.cfg.demoOnly && !confirm(`Delete "${tr.querySelector(".t-title").firstChild.textContent.trim()}"?`)) return;
     busy(b, async () => { await ctx.data.remove(ui.type, tr.dataset.id); await ctx.reload([ui.type]); rerender(); toast("Deleted"); });
   }));
 
