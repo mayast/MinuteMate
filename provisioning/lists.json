@@ -261,6 +261,83 @@
       ]
     },
     {
+      "title": "Artifacts",
+      "url": "Artifacts",
+      "fields": [
+        {
+          "name": "Project",
+          "display": "Project",
+          "type": "Lookup",
+          "lookupList": "Projects",
+          "schemaXml": "<Field Type='Lookup' Name='Project' StaticName='Project' DisplayName='Project' List='{ListId:Projects}' ShowField='Title' />"
+        },
+        {
+          "name": "ArtifactType",
+          "display": "Artifact Type",
+          "type": "Choice",
+          "choices": [
+            "File",
+            "Link"
+          ],
+          "default": "Link",
+          "schemaXml": "<Field Type='Choice' Name='ArtifactType' StaticName='ArtifactType' DisplayName='Artifact Type' Format='Dropdown'><Default>Link</Default><CHOICES><CHOICE>File</CHOICE><CHOICE>Link</CHOICE></CHOICES></Field>"
+        },
+        {
+          "name": "LinkUrl",
+          "display": "Link",
+          "type": "Note",
+          "rich": false,
+          "schemaXml": "<Field Type='Note' Name='LinkUrl' StaticName='LinkUrl' DisplayName='Link' NumLines='10' RichText='FALSE' />"
+        },
+        {
+          "name": "FileName",
+          "display": "File Name",
+          "type": "Text",
+          "schemaXml": "<Field Type='Text' Name='FileName' StaticName='FileName' DisplayName='File Name' MaxLength='255' />"
+        },
+        {
+          "name": "Content",
+          "display": "Text or Notes",
+          "type": "Note",
+          "rich": false,
+          "schemaXml": "<Field Type='Note' Name='Content' StaticName='Content' DisplayName='Text or Notes' NumLines='10' RichText='FALSE' />"
+        },
+        {
+          "name": "AssessmentStatus",
+          "display": "Assessment Status",
+          "type": "Choice",
+          "choices": [
+            "New",
+            "Assessing",
+            "Assessed",
+            "Needs review",
+            "Error"
+          ],
+          "default": "New",
+          "schemaXml": "<Field Type='Choice' Name='AssessmentStatus' StaticName='AssessmentStatus' DisplayName='Assessment Status' Format='Dropdown'><Default>New</Default><CHOICES><CHOICE>New</CHOICE><CHOICE>Assessing</CHOICE><CHOICE>Assessed</CHOICE><CHOICE>Needs review</CHOICE><CHOICE>Error</CHOICE></CHOICES></Field>"
+        },
+        {
+          "name": "AssessmentSummary",
+          "display": "Assessment Summary",
+          "type": "Note",
+          "rich": false,
+          "schemaXml": "<Field Type='Note' Name='AssessmentSummary' StaticName='AssessmentSummary' DisplayName='Assessment Summary' NumLines='10' RichText='FALSE' />"
+        },
+        {
+          "name": "AddedByEmail",
+          "display": "Added By Email",
+          "type": "Text",
+          "schemaXml": "<Field Type='Text' Name='AddedByEmail' StaticName='AddedByEmail' DisplayName='Added By Email' MaxLength='255' />"
+        },
+        {
+          "name": "LastAssessed",
+          "display": "Last Assessed",
+          "type": "DateTime",
+          "schemaXml": "<Field Type='DateTime' Name='LastAssessed' StaticName='LastAssessed' DisplayName='Last Assessed' Format='DateTime' />"
+        }
+      ]
+    },
+    {
       "title": "Action Items",
       "url": "ActionItems",
       "fields": [
@@ -468,6 +545,13 @@
           ],
           "default": "Open",
           "schemaXml": "<Field Type='Choice' Name='RiskStatus' StaticName='RiskStatus' DisplayName='Status' Format='Dropdown'><Default>Open</Default><CHOICES><CHOICE>Open</CHOICE><CHOICE>Mitigating</CHOICE><CHOICE>Closed</CHOICE></CHOICES></Field>"
+        },
+        {
+          "name": "SourceArtifact",
+          "display": "Source Artifact",
+          "type": "Lookup",
+          "lookupList": "Artifacts",
+          "schemaXml": "<Field Type='Lookup' Name='SourceArtifact' StaticName='SourceArtifact' DisplayName='Source Artifact' List='{ListId:Artifacts}' ShowField='Title' />"
         }
       ]
     },
@@ -639,6 +723,105 @@
           "display": "Slip Notified",
           "type": "Boolean",
           "schemaXml": "<Field Type='Boolean' Name='SlipNotified' StaticName='SlipNotified' DisplayName='Slip Notified'><Default>0</Default></Field>"
+        }
+      ]
+    },
+    {
+      "title": "Dependencies",
+      "url": "Dependencies",
+      "fields": [
+        {
+          "name": "Project",
+          "display": "Project",
+          "type": "Lookup",
+          "lookupList": "Projects",
+          "schemaXml": "<Field Type='Lookup' Name='Project' StaticName='Project' DisplayName='Project' List='{ListId:Projects}' ShowField='Title' />"
+        },
+        {
+          "name": "SourceMeeting",
+          "display": "Source Meeting",
+          "type": "Lookup",
+          "lookupList": "Meetings",
+          "schemaXml": "<Field Type='Lookup' Name='SourceMeeting' StaticName='SourceMeeting' DisplayName='Source Meeting' List='{ListId:Meetings}' ShowField='Title' />"
+        },
+        {
+          "name": "SourceArtifact",
+          "display": "Source Artifact",
+          "type": "Lookup",
+          "lookupList": "Artifacts",
+          "schemaXml": "<Field Type='Lookup' Name='SourceArtifact' StaticName='SourceArtifact' DisplayName='Source Artifact' List='{ListId:Artifacts}' ShowField='Title' />"
+        },
+        {
+          "name": "DependencyType",
+          "display": "Type",
+          "type": "Choice",
+          "choices": [
+            "Team",
+            "Vendor",
+            "System",
+            "Approval",
+            "Decision",
+            "Data"
+          ],
+          "default": "Team",
+          "schemaXml": "<Field Type='Choice' Name='DependencyType' StaticName='DependencyType' DisplayName='Type' Format='Dropdown'><Default>Team</Default><CHOICES><CHOICE>Team</CHOICE><CHOICE>Vendor</CHOICE><CHOICE>System</CHOICE><CHOICE>Approval</CHOICE><CHOICE>Decision</CHOICE><CHOICE>Data</CHOICE></CHOICES></Field>"
+        },
+        {
+          "name": "ProvidedBy",
+          "display": "Provided By",
+          "type": "Text",
+          "schemaXml": "<Field Type='Text' Name='ProvidedBy' StaticName='ProvidedBy' DisplayName='Provided By' MaxLength='255' />"
+        },
+        {
+          "name": "OwnerEmail",
+          "display": "Owner Email",
+          "type": "Text",
+          "schemaXml": "<Field Type='Text' Name='OwnerEmail' StaticName='OwnerEmail' DisplayName='Owner Email' MaxLength='255' />"
+        },
+        {
+          "name": "NeededBy",
+          "display": "Needed By",
+          "type": "Date",
+          "schemaXml": "<Field Type='DateTime' Name='NeededBy' StaticName='NeededBy' DisplayName='Needed By' Format='DateOnly' />"
+        },
+        {
+          "name": "DependencyStatus",
+          "display": "Status",
+          "type": "Choice",
+          "choices": [
+            "Open",
+            "At risk",
+            "Blocked",
+            "Resolved"
+          ],
+          "default": "Open",
+          "schemaXml": "<Field Type='Choice' Name='DependencyStatus' StaticName='DependencyStatus' DisplayName='Status' Format='Dropdown'><Default>Open</Default><CHOICES><CHOICE>Open</CHOICE><CHOICE>At risk</CHOICE><CHOICE>Blocked</CHOICE><CHOICE>Resolved</CHOICE></CHOICES></Field>"
+        },
+        {
+          "name": "Impact",
+          "display": "Impact",
+          "type": "Choice",
+          "choices": [
+            "High",
+            "Medium",
+            "Low"
+          ],
+          "default": "Medium",
+          "schemaXml": "<Field Type='Choice' Name='Impact' StaticName='Impact' DisplayName='Impact' Format='Dropdown'><Default>Medium</Default><CHOICES><CHOICE>High</CHOICE><CHOICE>Medium</CHOICE><CHOICE>Low</CHOICE></CHOICES></Field>"
+        },
+        {
+          "name": "RelatedMilestone",
+          "display": "Related Milestone",
+          "type": "Lookup",
+          "lookupList": "Milestones",
+          "schemaXml": "<Field Type='Lookup' Name='RelatedMilestone' StaticName='RelatedMilestone' DisplayName='Related Milestone' List='{ListId:Milestones}' ShowField='Title' />"
+        },
+        {
+          "name": "Details",
+          "display": "Details",
+          "type": "Note",
+          "rich": false,
+          "schemaXml": "<Field Type='Note' Name='Details' StaticName='Details' DisplayName='Details' NumLines='10' RichText='FALSE' />"
         }
       ]
     },

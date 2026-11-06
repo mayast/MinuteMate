@@ -38,6 +38,16 @@ Out of scope: localized (non-English) summaries.
 | 6.5 | **One-page IT request** | `docs/it-request.md` lists exactly what to approve for automatic capture | Built |
 | 6.6 | **One-click package** | Managed Power Platform solution attached to GitHub Releases | Maintainer: build once (see `docs/install.md`, part B) |
 
+## Phase 7: risks and dependencies
+
+| # | Item | What ships | Status |
+|---|---|---|---|
+| 7.1 | **Add artifacts** | Upload a file (to *Documents › MinuteMate Artifacts*), add a link, or paste meeting notes on the Risks & dependencies tab | Website: built |
+| 7.2 | **AI assessment** | Prompt 4 + Flow 12 log risks and dependencies from files and links; Prompt 1 + Flow 1 now log dependencies from meetings | Prompts + flows: guide · Demo: rule-based stand-in |
+| 7.3 | **One place to track** | Dependencies list (type, provider, needed by, status, impact, related milestone) next to Risks; every item links to its source | Website: built |
+| 7.4 | **Needs attention** | Ranked list: blocked, overdue, at-risk and needed-soon dependencies, needed after their milestone is due, high risks, and timeline conflicts | Website: built |
+| 7.5 | **Overview drill-down** | Overview shows the top items and counts; each item and "See all" jumps to the detail on the tab | Website: built |
+
 ## Later ideas
 - Portfolio view across all projects.
 - Power BI report on the same lists.

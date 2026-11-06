@@ -16,6 +16,11 @@ flowchart LR
     AI1 --> A[("Action Items")]
     AI1 --> R[("Risks")]
     AI1 --> D[("Decisions")]
+    AI1 --> DEP[("Dependencies")]
+    AR["Website: upload a file<br/>or add a link"] --> ART[("Artifacts")]
+    ART -->|Flow 12| AI4["AI Builder prompt:<br/>assess artifact"]
+    AI4 --> R
+    AI4 --> DEP
     A -->|Flow 3| N{"Notify via<br/>(item or project default)"}
     N --> T["Teams card"]
     N --> O["Outlook email"]
@@ -37,7 +42,9 @@ flowchart LR
 | Projects | One row per project; settings | Project Owner, Status Approver, Default Notify Via, Overall Status, Weekly Status On |
 | Meetings | Intake: the "meetings to capture" list | Project, Meeting Date, Attendees, Raw Notes, AI Summary, Processing Status, Meeting Notes Page |
 | Action Items | Tasks from meetings or added by hand | Owner, Due Date, Status, Priority, Notify Via, Notified |
-| Risks | Running risk log | Impact, Likelihood, Mitigation, Owner, Status |
+| Artifacts | Files and links added for assessment | Artifact Type, Link, File Name, Text or Notes, Assessment Status, Assessment Summary |
+| Risks | Running risk log | Impact, Likelihood, Mitigation, Owner, Status, Source Meeting or Source Artifact |
+| Dependencies | What the project waits on | Type, Provided By, Needed By, Status, Impact, Related Milestone, Source Meeting or Source Artifact |
 | Decisions | Running decision log | Decision Date, Decided By, Rationale |
 | Status Updates | One row per weekly draft | Week Of, Overall Status, Draft Page, Approval Status, Reviewer Comments, Published News Post |
 | Milestones | Timeline and dependencies | Workstream, Start Date, Due Date, Status, Owner Email, Gate, Depends On (multi-lookup) |
@@ -70,4 +77,6 @@ Action Items → Source, Closed Date, Tracker Item Id, Tracker Item, Sync State,
 | 3 | Pick meetings to capture (single, series, keyword rules, or invite MinuteMate); transcript queue with retry; Flow 4 sweeps for transcripts | This kit (Flow 4 needs admin setup) |
 | 4 | Kickoff kit with AI charter, timeline and dependency view with slip alerts, full tracker | This kit |
 | 5 | Tracker sync (Planner, Azure DevOps, GitHub), meeting-chat recap and agenda, actionable cards, duplicate checking, AI eval, privacy and retention, Impact tab, packaging and Teams app | This kit (see `docs/roadmap.md`) |
-| 6 | Portfolio view across projects, Power BI reporting, Teams single sign-on | Ideas |
+| 6 | Simple setup: layered README, Flow 0, setup check, IT request | This kit |
+| 7 | Risks & dependencies tab: assess files, links and meeting notes; ranked "needs attention" list linked from the Overview | This kit (Flow 12: guide) |
+| Later | Portfolio view across projects, Power BI reporting, Teams single sign-on | Ideas |

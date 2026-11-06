@@ -32,12 +32,18 @@ export function clearSite() { try { localStorage.removeItem(SITE_KEY); } catch {
 // list key → list URL name created by provisioning/Setup-MinuteMate.ps1
 export const LISTS = {
   projects: "Projects", meetings: "Meetings", actions: "ActionItems", risks: "Risks", decisions: "Decisions",
-  status: "StatusUpdates", milestones: "Milestones", stakeholders: "Stakeholders", kickoffs: "Kickoffs"
+  status: "StatusUpdates", milestones: "Milestones", stakeholders: "Stakeholders", kickoffs: "Kickoffs",
+  artifacts: "Artifacts", dependencies: "Dependencies"
 };
+
+// Files added on the Risks & dependencies tab go to this folder in the site's Documents library.
+export const ARTIFACT_FOLDER = "MinuteMate Artifacts";
+const MAX_UPLOAD = 4 * 1024 * 1024; // simple upload limit in Microsoft Graph
 
 function normalize(key, item) {
   const out = { ...item, id: String(item.id) };
-  if (out.ProjectLookupId != null) out.ProjectLookupId = String(out.ProjectLookupId);
+  // Lookup ids come back as numbers from Graph; the website compares them as strings.
+  for (const k of Object.keys(out)) if (k.endsWith("LookupId") && out[k] != null) out[k] = String(out[k]);
   if (key === "milestones") {
     const raw = item.DependsOnIds ?? item.DependsOn ?? [];
     out.DependsOnIds = (Array.isArray(raw) ? raw : []).map((d) => String(typeof d === "object" ? d.LookupId : d));
@@ -128,6 +134,19 @@ export const GraphData = {
       DependsOnLookupId: ids.map(Number)
     });
   },
+  // Upload a file to <Documents>/MinuteMate Artifacts/<project code>/ and return its SharePoint link.
+  async uploadFile(file, folder) {
+    if (file.size > MAX_UPLOAD) throw new Error(`${file.name} is larger than 4 MB. Upload it to SharePoint or OneDrive, then add its link instead.`);
+    const token = await accessToken();
+    if (!token) throw new Error("Your sign-in expired. Please sign in again.");
+    const path = [ARTIFACT_FOLDER, folder, file.name].filter(Boolean).map(encodeURIComponent).join("/");
+    const res = await fetch(`https://graph.microsoft.com/v1.0/sites/${this.siteId}/drive/root:/${path}:/content?@microsoft.graph.conflictBehavior=rename`, {
+      method: "PUT", headers: { Authorization: `Bearer ${token}`, "Content-Type": file.type || "application/octet-stream" }, body: file
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.error?.message || `Upload failed (${res.status})`);
+    return { url: data.webUrl, name: data.name };
+  },
   async calendar(days) {
     const start = new Date();
     const end = new Date(Date.now() + days * 864e5);
@@ -194,7 +213,32 @@ export function createDemoData() {
     ],
     risks: [
       { id: "33", Title: "Vendor API may slip again", ProjectLookupId: "1", Impact: "High", Likelihood: "Medium", Mitigation: "Weekly vendor check-in; manual CSV import fallback", RiskStatus: "Mitigating" },
-      { id: "34", Title: "Localized strings not reviewed before beta", ProjectLookupId: "1", SourceMeetingLookupId: "12", Created: at(-2), Impact: "Medium", Likelihood: "High", Mitigation: "Book review with language leads", RiskStatus: "Open" }
+      { id: "34", Title: "Localized strings not reviewed before beta", ProjectLookupId: "1", SourceMeetingLookupId: "12", Created: at(-2), Impact: "Medium", Likelihood: "High", Mitigation: "Book review with language leads", RiskStatus: "Open" },
+      { id: "35", Title: "Unsigned change order could stall vendor integration", ProjectLookupId: "1", SourceArtifactLookupId: "95", Created: at(-6), Impact: "High", Likelihood: "Medium", Mitigation: "Escalate to the procurement lead; ask the vendor to start on interim terms", RiskStatus: "Open" }
+    ],
+    artifacts: [
+      { id: "95", Title: "Vendor API statement of work", ProjectLookupId: "1", ArtifactType: "File", FileName: "Vendor-API-SOW.pdf",
+        LinkUrl: "https://contoso.sharepoint.com/sites/ProjectHub/Shared%20Documents/MinuteMate%20Artifacts/PHX/Vendor-API-SOW.pdf",
+        AssessmentStatus: "Assessed", AssessmentSummary: "Integration work can't start until the vendor opens sandbox access and procurement signs the change order. Both feed the Vendor API integration milestone.",
+        AddedByEmail: "maya@contoso.com", Created: at(-6), LastAssessed: at(-6) },
+      { id: "96", Title: "Localization handoff checklist", ProjectLookupId: "1", ArtifactType: "Link",
+        LinkUrl: "https://contoso.sharepoint.com/sites/ProjectHub/SitePages/Localization-handoff.aspx",
+        AssessmentStatus: "Assessed", AssessmentSummary: "String translation starts only after engineering freezes the final UI strings.",
+        AddedByEmail: "laura.chen@contoso.com", Created: at(-4), LastAssessed: at(-4) }
+    ],
+    dependencies: [
+      { id: "101", Title: "Change order signed by procurement", ProjectLookupId: "1", SourceArtifactLookupId: "95", DependencyType: "Approval", ProvidedBy: "Procurement",
+        OwnerEmail: "maya@contoso.com", NeededBy: at(-1), DependencyStatus: "Blocked", Impact: "High", RelatedMilestoneLookupId: "62",
+        Details: "The SOW says work beyond the pilot needs a signed change order.", Created: at(-6) },
+      { id: "102", Title: "Vendor API sandbox access", ProjectLookupId: "1", SourceArtifactLookupId: "95", DependencyType: "Vendor", ProvidedBy: "Fabrikam (vendor)",
+        OwnerEmail: "ken.sato@contoso.com", NeededBy: at(3), DependencyStatus: "At risk", Impact: "High", RelatedMilestoneLookupId: "62",
+        Details: "Sandbox credentials promised \"early next week\" with no firm date.", Created: at(-6) },
+      { id: "103", Title: "Final UI strings frozen by engineering", ProjectLookupId: "1", SourceArtifactLookupId: "96", DependencyType: "Team", ProvidedBy: "Engineering",
+        OwnerEmail: "laura.chen@contoso.com", NeededBy: at(8), DependencyStatus: "Open", Impact: "Medium", RelatedMilestoneLookupId: "64", Created: at(-4) },
+      { id: "104", Title: "Review slots with JA/DE language leads", ProjectLookupId: "1", SourceMeetingLookupId: "12", DependencyType: "Team", ProvidedBy: "Language leads",
+        OwnerEmail: "laura.chen@contoso.com", NeededBy: at(12), DependencyStatus: "Open", Impact: "Medium", RelatedMilestoneLookupId: "65", Created: at(-2) },
+      { id: "105", Title: "Beta telemetry dashboard", ProjectLookupId: "1", SourceMeetingLookupId: "17", DependencyType: "System", ProvidedBy: "Data platform",
+        NeededBy: at(-6), DependencyStatus: "Resolved", Impact: "Low", RelatedMilestoneLookupId: "63", Created: at(-14) }
     ],
     decisions: [
       { id: "51", Title: "Launch moved from June 5 to June 12", ProjectLookupId: "1", SourceMeetingLookupId: "11", DecisionDate: at(-7), DecidedBy: "Steering group", Rationale: "Vendor API not ready" },
@@ -252,6 +296,10 @@ export function createDemoData() {
     async update(key, id, fields) { Object.assign(db[key].find((x) => x.id === id), fields); return wait(null); },
     async remove(key, id) { db[key] = db[key].filter((x) => x.id !== id); return wait(null); },
     async setDeps(id, ids) { db.milestones.find((x) => x.id === id).DependsOnIds = ids.map(String); return wait(null); },
+    async uploadFile(file, folder) {
+      const name = file.name;
+      return wait({ name, url: `${this.site.url}/Shared%20Documents/${encodeURIComponent(ARTIFACT_FOLDER)}/${encodeURIComponent(folder || "")}/${encodeURIComponent(name)}` });
+    },
     async calendar() { return wait(calendar); },
     async people(q) { const s = q.toLowerCase(); return wait(people.filter((p) => p.name.toLowerCase().startsWith(s) || p.email.startsWith(s))); }
   };

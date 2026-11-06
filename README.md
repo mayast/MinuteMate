@@ -13,6 +13,9 @@ Power Automate), so there's no server to run and your data stays in your tenant.
 - **Capture:** pick the Teams meetings to capture, or invite MinuteMate to the meeting. Pasting notes works too.
 - **Follow-through:** AI logs action items, risks and decisions; owners get a Teams card they can update; the recap
   lands in the meeting chat, and an agenda arrives before the next one.
+- **Risks and dependencies:** upload a file, add a link or paste meeting notes, and MinuteMate logs the risks
+  and dependencies it finds, linked back to the source. One tab ranks what needs attention; the Overview links
+  straight to each item.
 - **Planning:** a kickoff kit (charter, RACI, milestone plan), a timeline that flags dependency conflicts, and one
   tracker for everything. Action items can also go to Planner, Azure DevOps or GitHub.
 - **Reporting:** a weekly status draft, approved by a person, published as a SharePoint News post. The Impact tab
@@ -75,8 +78,8 @@ and why. Until then, pasting the Teams recap into a meeting works.
 | Folder | What's inside |
 |---|---|
 | [`web/`](web/) | The website (plain HTML and JavaScript, no build step). Demo with `?demo=1` |
-| [`flows/`](flows/) | Step-by-step guides for Flows 0–11, if you want to build or customize them |
-| [`prompts/`](prompts/) | The three AI Builder prompts |
+| [`flows/`](flows/) | Step-by-step guides for Flows 0–12, if you want to build or customize them |
+| [`prompts/`](prompts/) | The four AI Builder prompts |
 | [`provisioning/`](provisioning/) | `lists.json` (list definitions) and a PowerShell alternative to Flow 0 |
 | [`eval/`](eval/) | AI quality tests: `node eval/score.mjs` |
 | [`templates/`](templates/) | Teams cards, email, and page templates |

@@ -96,6 +96,13 @@ Then **Attendees Text** — *Compose*: `join(body('Attendee_Names'), ', ')`
 - SharePoint *Create item* (Risks): Title, Project Id, Source Meeting Id, Impact, Likelihood, Mitigation,
   Status `Open`. (Owner: optional — reuse the 8a/8b pattern if you want it resolved.)
 
+### 9b. **Each Dependency** — *Apply to each* over `body('Parse_Items')?['dependencies']`
+- SharePoint *Create item* (Dependencies): Title, Project Id, Source Meeting Id, Type Value `type`,
+  Provided By `provided_by`, Status Value `status`, Impact Value `impact`,
+  Needed By `if(empty(items('Each_Dependency')?['needed_by']), null, items('Each_Dependency')?['needed_by'])`.
+  They appear on the website's **Risks & dependencies** tab, linked to this meeting.
+- Older Prompt 1 without `dependencies`? Use `coalesce(body('Parse_Items')?['dependencies'], createArray())`.
+
 ### 10. **Each Decision** — *Apply to each* over `body('Parse_Items')?['decisions']`
 - SharePoint *Create item* (Decisions): Title, Project Id, Source Meeting Id,
   Decision Date `triggerOutputs()?['body/MeetingDate']`, Decided By, Rationale.

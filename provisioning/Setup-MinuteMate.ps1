@@ -4,8 +4,8 @@
 
 .DESCRIPTION
   Run once per SharePoint site. Safe to re-run: existing lists and columns are skipped.
-  Creates: Projects, Meetings, Action Items, Risks, Decisions, Status Updates,
-  Milestones, Stakeholders, Kickoffs (Phases 1-4).
+  Creates: Projects, Meetings, Artifacts, Action Items, Risks, Decisions, Status Updates,
+  Milestones, Dependencies, Stakeholders, Kickoffs.
 
 .REQUIREMENTS
   - PowerShell 7.4+
@@ -135,6 +135,18 @@ BoolF   $meetings "AgendaPosted" "Agenda Posted"
 BoolF   $meetings "TranscriptPurged" "Transcript Purged"
 UrlF    $meetings "NotesPage" "Meeting Notes Page"
 
+# ---------- Artifacts (files and links added for risk and dependency assessment) ----------
+$artifacts = Ensure-List "Artifacts" "Artifacts"
+LookupF $artifacts "Project" "Project" $projects
+Choice  $artifacts "ArtifactType" "Artifact Type" @('File', 'Link') "Link"
+Note    $artifacts "LinkUrl" "Link"
+Text    $artifacts "FileName" "File Name"
+Note    $artifacts "Content" "Text or Notes"
+Choice  $artifacts "AssessmentStatus" "Assessment Status" @('New', 'Assessing', 'Assessed', 'Needs review', 'Error') "New"
+Note    $artifacts "AssessmentSummary" "Assessment Summary"
+Text    $artifacts "AddedByEmail" "Added By Email"
+DateTimeF $artifacts "LastAssessed" "Last Assessed"
+
 # ---------- Action Items ----------
 $actions = Ensure-List "Action Items" "ActionItems"
 LookupF $actions "Project" "Project" $projects
@@ -164,6 +176,7 @@ Choice  $risks "Likelihood" "Likelihood" @('High', 'Medium', 'Low') "Medium"
 Note    $risks "Mitigation" "Mitigation"
 UserF   $risks "Owner" "Owner"
 Choice  $risks "RiskStatus" "Status" @('Open', 'Mitigating', 'Closed') "Open"
+LookupF $risks "SourceArtifact" "Source Artifact" $artifacts
 
 # ---------- Decisions ----------
 $decisions = Ensure-List "Decisions" "Decisions"
@@ -194,6 +207,20 @@ Text    $milestones "OwnerEmail" "Owner Email"
 BoolF   $milestones "IsGate" "Gate"
 LookupMultiF $milestones "DependsOn" "Depends On" $milestones
 BoolF   $milestones "SlipNotified" "Slip Notified"
+
+# ---------- Dependencies (what the project waits on, found in meetings and artifacts) ----------
+$dependencies = Ensure-List "Dependencies" "Dependencies"
+LookupF $dependencies "Project" "Project" $projects
+LookupF $dependencies "SourceMeeting" "Source Meeting" $meetings
+LookupF $dependencies "SourceArtifact" "Source Artifact" $artifacts
+Choice  $dependencies "DependencyType" "Type" @('Team', 'Vendor', 'System', 'Approval', 'Decision', 'Data') "Team"
+Text    $dependencies "ProvidedBy" "Provided By"
+Text    $dependencies "OwnerEmail" "Owner Email"
+DateF   $dependencies "NeededBy" "Needed By"
+Choice  $dependencies "DependencyStatus" "Status" @('Open', 'At risk', 'Blocked', 'Resolved') "Open"
+Choice  $dependencies "Impact" "Impact" @('High', 'Medium', 'Low') "Medium"
+LookupF $dependencies "RelatedMilestone" "Related Milestone" $milestones
+Note    $dependencies "Details" "Details"
 
 # ---------- Stakeholders (Phase 4: kickoff kit) ----------
 $stakeholders = Ensure-List "Stakeholders" "Stakeholders"

@@ -10,11 +10,12 @@ import * as settings from "./views/settings.js";
 import * as impact from "./views/impact.js";
 import * as setup from "./views/setup.js";
 import * as kickoff from "./views/kickoff.js";
+import * as risks from "./views/risks.js";
 
 const CFG = window.MINUTEMATE_CONFIG || {};
 // demoOnly: a hosted showcase copy with no Microsoft 365 connection (sample data only).
 const DEMO = new URLSearchParams(location.search).has("demo") || CFG.demoOnly === true;
-const VIEWS = { overview, meetings, tracker, timeline, impact, settings, kickoff, setup };
+const VIEWS = { overview, meetings, tracker, timeline, risks, impact, settings, kickoff, setup };
 
 const ctx = {
   cfg: CFG,

@@ -21,7 +21,8 @@ export function render(ctx, el) {
   const kw = keywordsOf(p);
   const suggestions = ctx.state.calendar.filter((e) => !byUrl.has(e.joinUrl) && !optedOut(e) && kw.some((k) => e.title.toLowerCase().includes(k)));
   if (ctx.state.openMeetingId) { openId = ctx.state.openMeetingId; ctx.state.openMeetingId = null; }
-  const queue = ctx.items("meetings").filter((m) => m.CaptureMode === "Teams transcript" || m.ProcessingStatus !== "Done")
+  // Pasted-notes meetings that are done only show here when another tab links to one.
+  const queue = ctx.items("meetings").filter((m) => m.CaptureMode === "Teams transcript" || m.ProcessingStatus !== "Done" || m.id === openId)
     .sort((a, b) => (b.MeetingStart || "").localeCompare(a.MeetingStart || ""));
   const invite = ctx.cfg.inviteAddress;
 
@@ -108,7 +109,7 @@ function queueRow(ctx, m) {
 // What a meeting produced: summary, action items, decisions, risks, and where to go next.
 function meetingDetail(ctx, m) {
   const from = (key) => (ctx.state.lists[key] || []).filter((x) => String(x.SourceMeetingLookupId || "") === m.id);
-  const actions = from("actions"), decisions = from("decisions"), risks = from("risks");
+  const actions = from("actions"), decisions = from("decisions"), risks = from("risks"), deps = from("dependencies");
   const summary = htmlToText(m.Summary);
   const waiting = { "Waiting for transcript": "MinuteMate will read the transcript after the meeting ends.", Processing: "MinuteMate is reading the transcript now.",
     Error: "No transcript was found. Check that transcription was on, then select Retry, or paste notes into the meeting in SharePoint.", New: "Notes are queued for processing." }[m.ProcessingStatus];
@@ -117,17 +118,19 @@ function meetingDetail(ctx, m) {
     ? (ctx.demo ? `<button class="btn ghost small" data-act="demo-notes">Open meeting notes</button>`
                 : `<a class="btn ghost small" href="${esc(m.NotesPage.Url)}" target="_blank" rel="noopener">Open meeting notes ↗</a>`)
     : "";
-  const total = actions.length + decisions.length + risks.length;
+  const total = actions.length + decisions.length + risks.length + deps.length;
   return `
     <p class="detail-summary">${summary ? esc(summary) : `<span class="muted">${esc(waiting || "No summary yet.")}</span>`}</p>
     ${total || summary ? `<div class="detail-cols">
       <div><p class="agenda-h">Action items (${actions.length})</p>${list(actions, (a) => `<li>${esc(a.Title)} <span class="sub">— ${esc(a.OwnerAsWritten || a.OwnerEmail || "no owner")}${a.DueDate ? `, due ${esc(fmtShort(a.DueDate))}` : ""}</span> ${a.ItemStatus === "Done" ? pill("Done") : isPast(a.DueDate) ? pill("Overdue") : ""}</li>`, "None")}</div>
       <div><p class="agenda-h">Decisions (${decisions.length})</p>${list(decisions, (d) => `<li>${esc(d.Title)}</li>`, "None")}
-        <p class="agenda-h">Risks (${risks.length})</p>${list(risks, (r) => `<li>${esc(r.Title)} ${r.Impact ? pill(r.Impact) : ""}</li>`, "None")}</div>
+        <p class="agenda-h">Risks (${risks.length})</p>${list(risks, (r) => `<li>${esc(r.Title)} ${r.Impact ? pill(r.Impact) : ""}</li>`, "None")}
+        <p class="agenda-h">Dependencies (${deps.length})</p>${list(deps, (d) => `<li>${esc(d.Title)} ${pill(d.DependencyStatus, "Open")}</li>`, "None")}</div>
     </div>` : ""}
     <div class="detail-actions">
       ${notes}
       ${total ? `<button class="btn ghost small" data-act="to-tracker" data-id="${esc(m.id)}">See these items in the Tracker</button>` : ""}
+      ${risks.length + deps.length ? `<button class="btn ghost small" data-act="to-risks" data-id="${esc(m.id)}">See risks and dependencies</button>` : ""}
     </div>`;
 }
 
@@ -195,6 +198,7 @@ function bind(ctx, el, suggestions) {
     applyFilter({ meetingId: e.target.dataset.id, status: "all" });
     ctx.selectTab("tracker");
   });
+  el.querySelector('[data-act="to-risks"]')?.addEventListener("click", (e) => { ctx.state.focus = { kind: "meeting", id: e.target.dataset.id }; ctx.selectTab("risks"); });
   el.querySelector('[data-act="demo-notes"]')?.addEventListener("click", () => toast("In your workspace this opens the meeting notes page in SharePoint."));
   const opened = el.querySelector(".queue-item.open");
   if (opened && ctx.state.scrollToMeeting) { ctx.state.scrollToMeeting = false; opened.scrollIntoView({ block: "center" }); }

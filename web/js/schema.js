@@ -46,6 +46,20 @@ export const REQUIRED = {
       "NotesPage"
     ]
   },
+  "Artifacts": {
+    "title": "Artifacts",
+    "columns": [
+      "Project",
+      "ArtifactType",
+      "LinkUrl",
+      "FileName",
+      "Content",
+      "AssessmentStatus",
+      "AssessmentSummary",
+      "AddedByEmail",
+      "LastAssessed"
+    ]
+  },
   "ActionItems": {
     "title": "Action Items",
     "columns": [
@@ -77,7 +91,8 @@ export const REQUIRED = {
       "Likelihood",
       "Mitigation",
       "Owner",
-      "RiskStatus"
+      "RiskStatus",
+      "SourceArtifact"
     ]
   },
   "Decisions": {
@@ -114,6 +129,22 @@ export const REQUIRED = {
       "IsGate",
       "DependsOn",
       "SlipNotified"
+    ]
+  },
+  "Dependencies": {
+    "title": "Dependencies",
+    "columns": [
+      "Project",
+      "SourceMeeting",
+      "SourceArtifact",
+      "DependencyType",
+      "ProvidedBy",
+      "OwnerEmail",
+      "NeededBy",
+      "DependencyStatus",
+      "Impact",
+      "RelatedMilestone",
+      "Details"
     ]
   },
   "Stakeholders": {

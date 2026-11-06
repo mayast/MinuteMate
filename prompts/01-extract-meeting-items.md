@@ -45,6 +45,13 @@ Rules:
 - risks: something that could delay, block or harm the project.
   - impact and likelihood: High, Medium or Low. Use Medium if unclear.
   - mitigation: what was proposed, or "" if nothing was proposed.
+- dependencies: something this project is waiting on from another team, a vendor, a system, an approval,
+  a decision or data before it can move forward.
+  - type: Team, Vendor, System, Approval, Decision or Data.
+  - provided_by: who must deliver it; "" if not stated.
+  - needed_by: YYYY-MM-DD only if a date was stated; otherwise "".
+  - status: Blocked if work is stopped by it; At risk if it's late or has no firm date; otherwise Open.
+  - impact: High, Medium or Low.
 - decisions: something the group agreed or approved. Not proposals or open questions.
 - open_questions: questions raised but not answered.
 - needs_review: true if the notes are too short, unclear, or you were unsure about any item.
@@ -76,6 +83,16 @@ Use empty arrays when there is nothing for a section.
       "likelihood": "Medium",
       "mitigation": "Weekly check-in with vendor; fallback to manual import.",
       "owner_name": "Ken Sato"
+    }
+  ],
+  "dependencies": [
+    {
+      "title": "Final API date from the vendor",
+      "type": "Vendor",
+      "provided_by": "Fabrikam",
+      "needed_by": "",
+      "status": "At risk",
+      "impact": "High"
     }
   ],
   "decisions": [

@@ -29,9 +29,9 @@ export const isPast = (iso) => !!iso && new Date(iso) < new Date(new Date().toDa
 export const DAY = 864e5;
 
 const PILL = {
-  Done: "ok", Published: "ok", Approved: "ok", "On track": "ok", Closed: "ok", Ready: "ok",
+  Done: "ok", Published: "ok", Approved: "ok", "On track": "ok", Closed: "ok", Ready: "ok", Assessed: "ok", Resolved: "ok",
   "Needs review": "warn", "Waiting for transcript": "warn", Pending: "warn", "At risk": "warn", "In progress": "info",
-  Mitigating: "info", Processing: "info", Generating: "info", "Draft requested": "info",
+  "Needed soon": "warn", Mitigating: "info", Processing: "info", Generating: "info", "Draft requested": "info", Assessing: "info",
   Error: "bad", "Sync error": "bad", Rejected: "bad", "Off track": "bad", Overdue: "bad", Blocked: "bad", High: "bad", Medium: "warn"
 };
 export const pill = (s, fallback = "New") => `<span class="pill ${PILL[s] || ""}">${esc(s || fallback)}</span>`;

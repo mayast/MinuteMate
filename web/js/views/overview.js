@@ -1,5 +1,6 @@
 // Overview: one screen with the project's health, what's late, what's next, and recent outputs.
 import { esc, pill, fmtDay, fmtShort, isPast } from "../ui.js";
+import { summarize, focusOn } from "./risks.js";
 
 export function render(ctx, el) {
   const p = ctx.project();
@@ -8,7 +9,7 @@ export function render(ctx, el) {
   const actions = ctx.items("actions");
   const open = actions.filter((a) => a.ItemStatus !== "Done").sort((a, b) => (a.DueDate || "9").localeCompare(b.DueDate || "9"));
   const overdue = open.filter((a) => isPast(a.DueDate));
-  const risks = ctx.items("risks").filter((r) => r.RiskStatus !== "Closed");
+  const rd = summarize(ctx);
   const milestones = ctx.items("milestones");
   const nextMs = milestones.filter((m) => m.MilestoneStatus !== "Done").sort((a, b) => (a.DueDate || "").localeCompare(b.DueDate || "")).slice(0, 5);
   const lateMs = milestones.filter((m) => m.MilestoneStatus !== "Done" && isPast(m.DueDate));
@@ -37,8 +38,13 @@ export function render(ctx, el) {
         <ul class="rows">${rows(open.slice(0, 6), (a) => `<li><span>${esc(a.Title)}<br><span class="sub">${esc(a.OwnerAsWritten || a.OwnerEmail || "No owner")} · ${a.DueDate ? "due " + esc(fmtDay(a.DueDate)) : "no due date"}</span></span>${isPast(a.DueDate) ? pill("Overdue") : `<span class="pill">${esc(a.Priority || "")}</span>`}</li>`, "Nothing open.")}</ul>
       </div>
       <div>
-        <h3>Open risks</h3>
-        <ul class="rows">${rows(risks, (r) => `<li><span>${esc(r.Title)}<br><span class="sub">${esc(r.Mitigation || r.RiskStatus || "")}</span></span>${pill(r.Impact)}</li>`, "No open risks.")}</ul>
+        <h3>Risks and dependencies</h3>
+        <p class="rd-summary">${rd.openRisks.length} open risk${rd.openRisks.length === 1 ? "" : "s"} · ${rd.openDeps.length} open dependenc${rd.openDeps.length === 1 ? "y" : "ies"}${rd.flagged ? ` · <strong class="bad-text">${rd.flagged} blocked or at risk</strong>` : ""}</p>
+        <ul class="rows">${rows(rd.attention.slice(0, 4), (a) => a.kind === "conflict"
+          ? `<li><button class="row-title plain" data-go="timeline"><span>${a.html}<br><span class="sub">Timeline dependency</span></span></button>${pill(a.status)}</li>`
+          : `<li><button class="row-title plain" data-rd-kind="${a.kind}" data-rd-id="${esc(a.id)}"><span>${esc(a.title)}<br><span class="sub">${a.kind === "risk" ? "Risk" : "Dependency"} · ${esc(a.why)}</span></span></button>${pill(a.status)}</li>`,
+          rd.openRisks.length + rd.openDeps.length ? "Nothing needs attention right now." : "No risks or dependencies yet. Add a file, link or meeting notes to find them.")}</ul>
+        <button class="linkish see-all" data-rd-all>See all risks and dependencies →</button>
       </div>
       <div>
         <h3>Recent meetings</h3>
@@ -54,6 +60,9 @@ export function render(ctx, el) {
     ctx.state.scrollToMeeting = true;
     ctx.selectTab("meetings");
   }));
+  el.querySelectorAll("[data-rd-kind]").forEach((b) => b.addEventListener("click", () => focusOn(ctx, { kind: b.dataset.rdKind, id: b.dataset.rdId })));
+  el.querySelector("[data-rd-all]")?.addEventListener("click", () => focusOn(ctx, { section: "attention" }));
+  el.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => ctx.selectTab(b.dataset.go)));
 }
 
 function emptyState() {
